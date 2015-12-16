@@ -3,6 +3,8 @@ var thirdPartyController = require('./controller/thirdPartyController');
 var employeeController = require('./controller/employeeController');
 var businessPeopleController = require('./controller/businessPeopleController');
 var hospitalController = require('./controller/hospitalController');
+var registrationController = require('./controller/registrationController');
+var dictController = require('./controller/dictController');
 
 module.exports = [
     {
@@ -85,5 +87,42 @@ module.exports = [
         path: "/api/preRegistrationForOthers",
         handler: businessPeopleController.getPreRegistrationForContact,
         secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/registrations/all",
+        handler: registrationController.getRegistrations,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/registrations/today",
+        handler: registrationController.getTodayRegistrations,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/departments",
+        handler: dictController.getDepartments,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/doctors",
+        handler: dictController.getDoctors,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/businessPeoples",
+        handler: dictController.getBusinessPeople,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/shiftPeriods",
+        handler: dictController.getShiftPeriods,
+        secured: 'user'
     }
+
 ];

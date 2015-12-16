@@ -18,4 +18,20 @@ db.query = function (sql, values) {
         });
     });
 };
+db.queryWithCount = function (sql, values) {
+    var data = {};
+    return using(pool.getConnectionAsync().disposer(function (connection) {
+        return connection.destroy();
+    }), function (connection) {
+        return connection.queryAsync(sql, values).then(function (result) {
+            data.rows = result[0];
+            return connection.queryAsync("SELECT FOUND_ROWS() as count");
+        }).then(function(result){
+            data.count = result[0][0].count;
+            return data;
+        }).catch(function (err) {
+            throw new Error(err);
+        });
+    });
+};
 module.exports = db;

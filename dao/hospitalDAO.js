@@ -6,6 +6,7 @@ module.exports = {
     findDepartments: function (hospitalId) {
         return db.query(sqlMapping.hospital.findDepartments, hospitalId);
     },
+
     findByUsername: function (username) {
         return db.query(sqlMapping.employee.findByUserName, username);
     },
@@ -30,7 +31,9 @@ module.exports = {
     findDoctorById: function (doctorId) {
         return db.query(sqlMapping.doctor.findById, doctorId);
     },
-
+    findDoctors: function (hospital) {
+        return db.query(sqlMapping.doctor.findDoctors, hospital)
+    },
     findShiftPlans: function (doctorId, start) {
         var end = moment(start).add(1, 'w').format('YYYY-MM-DD');
         return db.query(sqlMapping.doctor.findShitPlans, [doctorId, start, end]);

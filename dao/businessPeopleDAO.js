@@ -52,5 +52,11 @@ module.exports = {
     findRegistrationByUid: function (uid, mobile, page) {
         if (mobile !== undefined) return db.query(sqlMapping.businessPeople.findRegistrationsByUidAndMobile, [uid, mobile, page.from, page.size]);
         return db.query(sqlMapping.businessPeople.findRegistrationsByUid, [uid, page.from, page.size]);
+    },
+    findBusinessPeople: function (hospitalId) {
+        return db.query(sqlMapping.employee.findByRole, '业务员');
+    },
+    findShiftPeriods: function (hospitalId) {
+        return db.query(sqlMapping.businessPeople.findShiftPeriods, hospitalId);
     }
 }
