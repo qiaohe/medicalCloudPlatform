@@ -101,6 +101,24 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "post",
+        path: "/api/registrations",
+        handler: registrationController.addRegistration,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/registrations/:rid",
+        handler: registrationController.changeRegistration,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/registrations/:rid",
+        handler: registrationController.cancelRegistration,
+        secured: 'user'
+    },
+    {
         method: "get",
         path: "/api/dict/departments",
         handler: dictController.getDepartments,

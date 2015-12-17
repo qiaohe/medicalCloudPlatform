@@ -24,6 +24,8 @@
   "book.put.will.success": "更待到等待出借成功",
   "tag.remove.success": "删除标签成功",
   "tag.book.remove.success": "删除书籍标签成功",
-  "preRegistration.cancel.success":"取消预约成功",
-  "contacts.add.success":"添加联系人成功"
+  "preRegistration.cancel.success": "取消预约成功",
+  "contacts.add.success": "添加联系人成功",
+  "registration.cancel.success": "取消挂号成功",
+  "registration.update.success": "更新挂号成功"
 }
