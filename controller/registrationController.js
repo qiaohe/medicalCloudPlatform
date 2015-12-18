@@ -6,6 +6,8 @@ var businessPeopleDAO = require('../dao/businessPeopleDAO');
 var hospitalDAO = require('../dao/hospitalDAO');
 var _ = require('lodash');
 var moment = require('moment');
+var redis = require('../common/redisClient');
+var md5 = require('md5');
 function getConditions(req) {
     var conditions = [];
     if (req.query.memberType) conditions.push('r.memberType=' + req.query.memberType);
@@ -83,7 +85,7 @@ module.exports = {
                         patientBasicInfoId: r.patientBasicInfoId,
                         hospitalId: req.user.hospitalId,
                         memberType: 1,
-                        memberCardNo: req.user.hospitalId.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
+                        memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                         createDate: new Date()
                     }).then(function (patient) {
                         return patient.insertId;
@@ -127,6 +129,13 @@ module.exports = {
     cancelRegistration: function (req, res, next) {
         registrationDAO.updateRegistration({id: req.params.rid, status: 6}).then(function () {
             return res.send({ret: 0, message: i18n.get('registration.cancel.success')});
+        });
+        return next();
+    },
+    getRegistration: function (req, res, next) {
+        var rid = req.params.rid;
+        registrationDAO.findRegistrationsById(rid).then(function (result) {
+            res.send({ret: 0, data: result[0]});
         });
         return next();
     }

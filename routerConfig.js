@@ -25,8 +25,28 @@ module.exports = [
     },
     {
         method: 'post',
-        path: '/employees',
-        handler: employeeController.addEmployee
+        path: '/api/employees',
+        handler: employeeController.addEmployee,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/employees",
+        handler: employeeController.getEmployees,
+        secured: 'user'
+    },
+
+    {
+        method: "put",
+        path: "/api/employees",
+        handler: employeeController.updateEmployee,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/employees/:id",
+        handler: employeeController.deleteEmployee,
+        secured: 'user'
     },
     {
         method: 'get',
@@ -56,6 +76,24 @@ module.exports = [
         method: "get",
         path: "/api/departments",
         handler: hospitalController.getDepartments,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/departments",
+        handler: hospitalController.updateDepartment,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/departments/:id",
+        handler: hospitalController.removeDepartment,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/departments",
+        handler: hospitalController.addDepartment,
         secured: 'user'
     },
     {
@@ -107,6 +145,12 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "get",
+        path: "/api/registrations/:rid",
+        handler: registrationController.getRegistration,
+        secured: 'user'
+    },
+    {
         method: "post",
         path: "/api/registrations/:rid",
         handler: registrationController.changeRegistration,
@@ -140,6 +184,42 @@ module.exports = [
         method: "get",
         path: "/api/dict/shiftPeriods",
         handler: dictController.getShiftPeriods,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/doctors/:doctorId/registrationFee",
+        handler: dictController.getRegistrationFee,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/jobTitles",
+        handler: dictController.getJobTitles,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/employees/changePassword",
+        handler: employeeController.changePassword,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/hospitals",
+        handler: hospitalController.updateHospital,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/hospitals/me",
+        handler: hospitalController.getHospital,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/doctors",
+        handler: employeeController.getDoctors,
         secured: 'user'
     }
 

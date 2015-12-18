@@ -27,5 +27,12 @@
   "preRegistration.cancel.success": "取消预约成功",
   "contacts.add.success": "添加联系人成功",
   "registration.cancel.success": "取消挂号成功",
-  "registration.update.success": "更新挂号成功"
+  "registration.update.success": "更新挂号成功",
+  "employee.changePassword.success": "变更员工密码成功",
+  "employee.remove.success": "删除员工密码成功",
+  "employee.update.success": "更新员工成功",
+  "department.update.success": "更新科室成功",
+  "department.remove.success": "删除科室成功",
+  "hospital.update.success":"修改基本信息成功"
+
 }

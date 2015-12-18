@@ -6,6 +6,9 @@ module.exports = {
     findDepartments: function (hospitalId) {
         return db.query(sqlMapping.hospital.findDepartments, hospitalId);
     },
+    findJobTitles: function (hospitalId) {
+        return db.query(sqlMapping.hospital.findJobTitles, hospitalId);
+    },
 
     findByUsername: function (username) {
         return db.query(sqlMapping.employee.findByUserName, username);
@@ -37,6 +40,18 @@ module.exports = {
     findShiftPlans: function (doctorId, start) {
         var end = moment(start).add(1, 'w').format('YYYY-MM-DD');
         return db.query(sqlMapping.doctor.findShitPlans, [doctorId, start, end]);
+    },
+    addDepartment: function (department) {
+        return db.query(sqlMapping.department.insert, department);
+    },
+    updateDepartment: function (department) {
+        return db.query(sqlMapping.department.update, [department, department.id]);
+    },
+    removeDepartment: function (departmentId) {
+        return db.query(sqlMapping.department.delete, +departmentId);
+    },
+    updateHospital: function (hospital) {
+        return db.query(sqlMapping.hospital.update, [hospital, hospital.id]);
     }
 
 }

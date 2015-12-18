@@ -44,7 +44,7 @@ module.exports = {
         return db.query(sqlMapping.businessPeople.findPatientByBasicInfoId, patientBasicInfoId)
     },
     insertPatient: function (patient) {
-        return db.query(sqlMapping.businessPeople.insertPatient, patientBasicInfoId)
+        return db.query(sqlMapping.businessPeople.insertPatient, patient)
     },
     findShiftPeriodById: function (hospitalId, periodId) {
         return db.query(sqlMapping.businessPeople.findShiftPeriodById, [hospitalId, periodId]);

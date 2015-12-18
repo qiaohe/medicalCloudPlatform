@@ -33,5 +33,19 @@ module.exports = {
             res.send({ret: 0, data: result});
         });
         return next();
+    },
+    getRegistrationFee: function (req, res, next) {
+        hospitalDAO.findDoctorById(req.params.doctorId).then(function (doctors) {
+            return res.send({ret: 0, data: {id: doctors[0].id, registrationFee: doctors[0].registrationFee}});
+        });
+        return next();
+    },
+
+    getJobTitles: function (req, res, next) {
+        var hospitalId = req.user.hospitalId;
+        hospitalDAO.findJobTitles(hospitalId).then(function (jobs) {
+            res.send({ret: 0, data: jobs});
+        });
+        return next();
     }
 }
