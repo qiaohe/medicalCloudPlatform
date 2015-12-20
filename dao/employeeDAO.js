@@ -14,10 +14,20 @@ module.exports = {
     },
 
     findEmployees: function (hospitalId, page) {
-        return db.query(sqlMapping.employee.findEmployees, [hospitalId, page.from, page.size])
+        return db.queryWithCount(sqlMapping.employee.findEmployees, [hospitalId, page.from, page.size])
     },
 
     findDoctorsByHospital: function (hospital, page) {
-        return db.query(sqlMapping.doctor.findDoctorsByHospital, [hospital, page.from, page.size])
+        return db.queryWithCount(sqlMapping.doctor.findDoctorsByHospital, [hospital, page.from, page.size])
     },
+    findDoctorsGroupByDepartment: function (hospitalId) {
+        return db.query(sqlMapping.doctor.findDoctorsGroupByDepartment, hospitalId);
+    },
+
+    updateDoctor: function (doctor) {
+        return db.query(sqlMapping.doctor.update, [doctor, doctor.id]);
+    },
+    deleteDoctor: function (id) {
+        return db.query(sqlMapping.doctor.delete, id);
+    }
 }

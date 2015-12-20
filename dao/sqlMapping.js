@@ -37,7 +37,7 @@ module.exports = {
     },
 
     department: {
-        findByHospital: 'select id, name, introduction from Department where hospitalId = ?',
+        findByHospital: 'select * from Department where hospitalId = ?',
         insert: 'insert Department set ?',
         update: 'update Department set ? where id = ?',
         delete: 'delete from Department where id=?'
@@ -45,11 +45,14 @@ module.exports = {
 
     doctor: {
         findDoctors: 'select id, name from Doctor',
-        findDoctorsByHospital: 'select * from Doctor where status <> 2 and hospitalId = ? limit ?, ?',
+        findDoctorsByHospital: 'select SQL_CALC_FOUND_ROWS d.*, e.birthday, e.clinic, e.mobile from Doctor d, Employee e where e.id = d.employeeId and d.status <> 2 and d.hospitalId = ? limit ?, ?',
+        findDoctorsGroupByDepartment: 'select id, name, departmentName from Doctor where status <> 2 and hospitalId = ?',
         findByDepartment: 'select id, name, departmentName, hospitalName, headPic,registrationFee, speciality,jobTitle from Doctor where hospitalId = ?  and departmentId = ?',
         findById: 'select id, name, departmentName,hospitalId, hospitalName, headPic,registrationFee, speciality,jobTitle, departmentId, jobTitleId from Doctor where id =?',
         findShitPlans: 'select p.`name` as period, `day`, actualQuantity, plannedQuantity, p.id as periodId from ShiftPlan sp, ShiftPeriod p where sp.shiftPeriod = p.id and sp.doctorId = ? and sp.day>=? and sp.day<=? and sp.actualQuantity < sp.plannedQuantity and sp.plannedQuantity > 0 order by sp.day, sp.shiftPeriod',
-        findBy: 'select id, name, departmentName,hospitalId, hospitalName, headPic,registrationFee, speciality,jobTitle from Doctor where departmentId=? and registrationFee=? and id<>?'
+        findBy: 'select id, name, departmentName,hospitalId, hospitalName, headPic,registrationFee, speciality,jobTitle from Doctor where departmentId=? and registrationFee=? and id<>?',
+        update: 'update Doctor set ? where id = ?',
+        delete: 'delete from Doctor where id=?'
     },
 
     registration: {
@@ -63,5 +66,23 @@ module.exports = {
         findRegistrations: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.preRegistrationStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? limit ?, ?',
         findRegistrationsById: 'select * from Registration where id=?',
         findRegistrationsBy: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.preRegistrationStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? and r.registerDate=? limit ?, ?'
+    },
+    patient: {
+        findGroupCompanies: 'select SQL_CALC_FOUND_ROWS gc.*, e.`name` as recommenderName from GroupCompany gc left JOIN Employee e on e.id = gc.recommender where gc.hospitalId=? limit ?, ?',
+        updateGroupCompany: 'update GroupCompany set ? where id = ?',
+        deleteGroupCompany: 'delete from GroupCompany where id = ?',
+        insertGroupCompany: 'insert GroupCompany set ?',
+        findPatients: 'select SQL_CALC_FOUND_ROWS * from Patient p left JOIN Employee e on e.id = p.recommender, PatientBasicInfo pb  where p.patientBasicInfoId = pb.id and p.hospitalId =? limit ?, ?',
+        insertPrePaidHistory: 'insert PrepaidHistory set ?',
+        updatePatientBalance: 'update Patient set balance = balance + ? where id =?',
+        insertTransactionFlow: 'insert TransactionFlow set ?',
+        findByPatientId: 'select * from Patient where id=?',
+        findByPatientBasicInfo: 'select * from Patient p left JOIN Employee e on e.id = p.recommender, PatientBasicInfo pb  where p.patientBasicInfoId = pb.id and p.id = ? and p.hospitalId =?',
+        findTransactionFlows: 'select * from TransactionFlow where patientId=? and hospitalId = ?',
+        findRegistrations: 'select * from Registration where patientId = ? and hospitalId = ?'
+    },
+    city: {
+        findProvinces: 'select DISTINCT province from city',
+        findCities: 'select cityId, city from city where province=?'
     }
 }

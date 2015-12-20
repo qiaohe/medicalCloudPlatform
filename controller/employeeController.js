@@ -50,6 +50,8 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }).then(function (empoyees) {
+            if (!empoyees.rows.length) return res.send({ret: 0, data: []});
+            empoyees.pageIndex = pageIndex;
             res.send({ret: 0, data: empoyees});
         });
         return next();
@@ -62,14 +64,45 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }).then(function (doctors) {
-            if (!doctors.length) return res.send({ret: 0, data: doctors});
-            doctors && doctors.forEach(function (doctor) {
+            if (!doctors.rows.length) return res.send({ret: 0, data: doctors});
+            doctors.rows && doctors.rows.forEach(function (doctor) {
                 doctor.gender = config.gender[doctor.gender];
                 doctor.images = doctor.images && doctor.images.split(',');
             });
+            doctors.pageIndex = pageIndex;
             res.send({ret: 0, data: doctors});
         });
         return next();
-    }
+    },
 
+    deleteDoctor: function (req, res, next) {
+        employeeDAO.deleteDoctor(req.params.id).then(function (result) {
+            res.send({ret: 0, message: i18n.get('doctor.delete.success')});
+        });
+        return next();
+    },
+
+    updateDoctor: function (req, res, next) {
+        var doctor = req.body;
+        doctor.hospitalId = req.user.hospitalId;
+        doctor.updateDate = new Date();
+        doctor.images = doctor.images && doctor.images.join(',');
+        employeeDAO.updateDoctor(doctor).then(function (result) {
+            res.send({ret: 0, message: i18n.get('doctor.update.success')});
+        });
+        return next();
+    },
+    getDoctorsGroupByDepartment: function (req, res, next) {
+        var hospitalId = req.user.hospitalId;
+        employeeDAO.findDoctorsGroupByDepartment(hospitalId).then(function (doctors) {
+            if (!doctors.length) return res.send({ret: 0, data: doctors});
+            res.send({
+                ret: 0, data: _.groupBy(doctors, function (item) {
+                    var s = item.departmentName;
+                    delete item.departmentName;
+                    return s;
+                })
+            });
+        });
+    }
 }

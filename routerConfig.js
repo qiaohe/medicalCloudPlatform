@@ -5,6 +5,7 @@ var businessPeopleController = require('./controller/businessPeopleController');
 var hospitalController = require('./controller/hospitalController');
 var registrationController = require('./controller/registrationController');
 var dictController = require('./controller/dictController');
+var patientController = require('./controller/patientController');
 
 module.exports = [
     {
@@ -221,6 +222,83 @@ module.exports = [
         path: "/api/doctors",
         handler: employeeController.getDoctors,
         secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/groupCompanies",
+        handler: patientController.getGroupCompanies,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/groupCompanies",
+        handler: patientController.insertGroupCompany,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/groupCompanies",
+        handler: patientController.updateGroupCompany,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/groupCompanies/:id",
+        handler: patientController.deleteGroupCompany,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/departments/doctors",
+        handler: employeeController.getDoctorsGroupByDepartment,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/doctors",
+        handler: employeeController.updateDoctor,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/doctors/:id",
+        handler: employeeController.deleteDoctor,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/provinces",
+        handler: dictController.getProvinces,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/dict/provinces/:province/cities",
+        handler: dictController.getCities,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/patients",
+        handler: patientController.getPatients,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/patients",
+        handler: patientController.addPatient,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/prePaidHistories",
+        handler: patientController.addPrePaidHistory,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/patients/:patientId",
+        handler: patientController.getPatient,
+        secured: 'user'
     }
-
 ];

@@ -47,5 +47,19 @@ module.exports = {
             res.send({ret: 0, data: jobs});
         });
         return next();
+    },
+    getProvinces: function (req, res, next) {
+        hospitalDAO.findProvinces().then(function (provinces) {
+            res.send({ret: 0, data: provinces});
+        });
+        return next();
+    },
+
+    getCities: function (req, res, next) {
+        hospitalDAO.findCities(req.params.province).then(function (cities) {
+            res.send({ret: 0, data: cities});
+        });
+        return next();
+
     }
 }

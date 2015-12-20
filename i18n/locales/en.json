@@ -33,6 +33,9 @@
   "employee.update.success": "更新员工成功",
   "department.update.success": "更新科室成功",
   "department.remove.success": "删除科室成功",
-  "hospital.update.success":"修改基本信息成功"
-
+  "hospital.update.success": "修改基本信息成功",
+  "groupCompany.update.success": "集团用户更新成功",
+  "groupCompany.delete.success": "集团用户删除成功",
+  "doctor.update.success": "医生信息更新成功",
+  "doctor.remove.success": "删除医生成功"
 }

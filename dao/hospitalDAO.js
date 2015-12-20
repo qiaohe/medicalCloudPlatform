@@ -52,6 +52,13 @@ module.exports = {
     },
     updateHospital: function (hospital) {
         return db.query(sqlMapping.hospital.update, [hospital, hospital.id]);
+    },
+    findProvinces: function () {
+        return db.query(sqlMapping.city.findProvinces);
+    },
+    findCities: function (province) {
+        return db.query(sqlMapping.city.findCities, [province]);
     }
+
 
 }
