@@ -11,6 +11,9 @@ module.exports = {
     findContactsBy: function (businessPeopleId) {
         return db.query(sqlMapping.businessPeople.findContactsBy, businessPeopleId);
     },
+    findContactsByPagable: function (businessPeopleId, page) {
+        return db.queryWithCount(sqlMapping.businessPeople.findContactsByPagable, [businessPeopleId, page.from, page.size]);
+    },
 
     insertContact: function (contact) {
         return db.query(sqlMapping.businessPeople.insertContact, contact);
@@ -58,5 +61,12 @@ module.exports = {
     },
     findShiftPeriods: function (hospitalId) {
         return db.query(sqlMapping.businessPeople.findShiftPeriods, hospitalId);
+    },
+    transferContact: function (toBusinessPeopleId, contacts) {
+        return db.query(sqlMapping.businessPeople.transferContact + '(' + contacts+ ')', [toBusinessPeopleId, contacts]);
+    },
+
+    addTransferHistory: function (history) {
+        return db.query(sqlMapping.businessPeople.addTransferHistory, history);
     }
 }

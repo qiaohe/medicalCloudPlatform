@@ -74,6 +74,13 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: 'post',
+        path: '/api/contacts/transfer',
+        handler: businessPeopleController.transferContact,
+        secured: 'user'
+    },
+
+    {
         method: "get",
         path: "/api/departments",
         handler: hospitalController.getDepartments,
@@ -179,6 +186,12 @@ module.exports = [
         method: "get",
         path: "/api/dict/businessPeoples",
         handler: dictController.getBusinessPeople,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/businessPeoples/:id/contacts",
+        handler: businessPeopleController.getContactsByBusinessPeopleId,
         secured: 'user'
     },
     {

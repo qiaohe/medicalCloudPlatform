@@ -24,7 +24,10 @@ module.exports = {
         findPerformanceByMonth: 'select actualCount, plannedCount, ROUND(actualCount / plannedCount, 2) as completePercentage from Performance where businessPeopleId = ? and yearMonth=?',
         findPerformanceByYear: 'select sum(actualCount)as actualCount, sum(plannedCount)  as plannedCount from Performance where businessPeopleId = ? and SUBSTRING(yearMonth, 1, 4) = ?',
         findContactsBy: 'select id, mobile, name, createDate, inviteTimes, source, inviteResult from InvitationContact where businessPeopleId=?',
-        findShiftPeriods: 'select id, name from ShiftPeriod where hospitalId = ?'
+        findContactsByPagable: 'select SQL_CALC_FOUND_ROWS ic.id, ic.mobile, ic.name, ic.createDate, ic.inviteTimes, ic.source, ic.inviteResult,gc.`name` as groupName from InvitationContact ic left join GroupCompany gc on gc.id = ic.groupId where ic.businessPeopleId=? limit ?, ?',
+        findShiftPeriods: 'select id, name from ShiftPeriod where hospitalId = ?',
+        transferContact: 'update InvitationContact set businessPeopleId=? where id in ',
+        addTransferHistory: 'insert ContactTransferHistory set ?'
     },
     hospital: {
         findDepartments: 'select id, name from Department where hospitalId = ?',

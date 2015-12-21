@@ -37,6 +37,36 @@ module.exports = {
         });
         return next();
     },
+    getContactsByBusinessPeopleId: function (req, res, next) {
+        var pageIndex = +req.query.pageIndex;
+        var pageSize = +req.query.pageSize;
+        businessPeopleDAO.findContactsByPagable(req.params.id, {
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        }).then(function (contacts) {
+            if (!contacts.rows.length) return res.send({ret: 0, data: null});
+            contacts.rows.forEach(function (contact) {
+                contact.source = config.sourceType[contact.source];
+            });
+            contacts.pageIndex = pageIndex;
+            res.send({ret: 0, data: contacts});
+        });
+        return next();
+    },
+
+    transferContact: function (req, res, next) {
+        var transfer = req.body;
+        businessPeopleDAO.transferContact(transfer.toBusinessPeopleId, transfer.contacts.join(',')).then(function (rsult) {
+            transfer.createDate = new Date();
+            transfer.creator = req.user.id;
+            transfer.hospitalId = req.user.hospitalId;
+            delete transfer.contacts;
+            return businessPeopleDAO.addTransferHistory(transfer);
+        }).then(function (result) {
+            res.send({ret: 0, message: '转移成功'});
+        });
+        return next();
+    },
     addContact: function (req, res, next) {
         var contact = req.body;
         contact.businessPeopleId = req.user.id;
