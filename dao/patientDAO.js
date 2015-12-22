@@ -38,5 +38,11 @@ module.exports = {
 
     findRegistrations: function (patientId, hospitalId) {
         return db.query(sqlMapping.patient.findRegistrations, [patientId, hospitalId]);
+    },
+    findGroupCompanyById: function (id) {
+        return db.query(sqlMapping.patient.findGroupCompanyById, id);
+    },
+    updatePatient: function (patient) {
+        return db.query(sqlMapping.patient.updatePatient, [patient, patient.id]);
     }
 }

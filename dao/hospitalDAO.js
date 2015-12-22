@@ -58,7 +58,26 @@ module.exports = {
     },
     findCities: function (province) {
         return db.query(sqlMapping.city.findCities, [province]);
+    },
+    findRoles: function (hospitalId) {
+        return db.query(sqlMapping.employee.findRoles, hospitalId);
+    },
+    findJobTitleByRole: function (hospitalId, roleId) {
+        return db.query(sqlMapping.employee.findJobTitleByRole, [hospitalId, roleId]);
+    },
+    addShiftPlan: function (shiftPlan) {
+        return db.query(sqlMapping.registration.addShiftPlan, shiftPlan);
+    },
+    findShiftPlansBy: function (hospitalId, doctorId) {
+        return db.query(sqlMapping.registration.findShiftPlans, [+hospitalId, +doctorId]);
+    },
+    findShiftPlansByDay: function (hospitalId, doctorId, day) {
+        return db.query(sqlMapping.registration.findShiftPlansByDay, [+hospitalId, +doctorId, day]);
+    },
+    findPerformances: function (hospitalId, conditions) {
+        return db.query(sqlMapping.businessPeople.findPerformances + (conditions.length ? ' and ' + conditions : '') + '  order by name, yearMonth', hospitalId);
+    },
+    addPerformance: function (performance) {
+        return db.query(sqlMapping.businessPeople.insertPerformance, performance)
     }
-
-
 }

@@ -57,7 +57,7 @@ module.exports = {
         return db.query(sqlMapping.businessPeople.findRegistrationsByUid, [uid, page.from, page.size]);
     },
     findBusinessPeople: function (hospitalId) {
-        return db.query(sqlMapping.employee.findByRole, '业务员');
+        return db.query(sqlMapping.employee.findByRole, 3);
     },
     findShiftPeriods: function (hospitalId) {
         return db.query(sqlMapping.businessPeople.findShiftPeriods, hospitalId);
@@ -68,5 +68,8 @@ module.exports = {
 
     addTransferHistory: function (history) {
         return db.query(sqlMapping.businessPeople.addTransferHistory, history);
+    },
+    updatePatientBasicInfo: function(patientBasicInfo) {
+        return db.query(sqlMapping.businessPeople.updatePatientBasicInfo, [patientBasicInfo, patientBasicInfo.id])
     }
 }

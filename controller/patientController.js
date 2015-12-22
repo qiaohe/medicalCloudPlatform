@@ -6,6 +6,7 @@ var redis = require('../common/redisClient');
 var businessPeopleDAO = require('../dao/businessPeopleDAO');
 var _ = require('lodash');
 var md5 = require('md5');
+var moment = require('moment');
 module.exports = {
     getGroupCompanies: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
@@ -25,6 +26,18 @@ module.exports = {
         });
         return next();
     },
+    getGroupCompany: function (req, res, next) {
+        var groupId = req.params.id;
+        patientDAO.findGroupCompanyById(groupId).then(function (companies) {
+            if (!companies.length) res.send({ret: 0, data: []});
+            var company = companies[0];
+            company.source = config.sourceType[company.source];
+            company.cashbackType = config.cashbackType[company.cashbackType];
+            res.send({ret: 0, data: company});
+        });
+        return next();
+    },
+
     insertGroupCompany: function (req, res, next) {
         var groupCompany = req.body;
         groupCompany.hospitalId = req.user.hospitalId;
@@ -58,6 +71,11 @@ module.exports = {
             size: pageSize
         }).then(function (patients) {
             if (!patients.rows.length) return res.send({ret: 0, data: []});
+            patients.rows.forEach(function (p) {
+                p.memberType = p.memberType && config.memberType[p.memberType];
+                p.source = p.source && config.sourceType[p.source];
+                p.consumptionLevel = p.consumptionLevel && config.consumptionLevel[p.consumptionLevel];
+            })
             patients.pageIndex = pageIndex;
             res.send({ret: 0, data: patients});
         });
@@ -78,6 +96,7 @@ module.exports = {
                 gender: patient.gender,
                 idCard: patient.idCard,
                 headPic: patient.headPic,
+                address: patient.address,
                 status: 0
             }).then(function (result) {
                 return result.insertId;
@@ -99,6 +118,7 @@ module.exports = {
                         consumptionLevel: patient.consumptionLevel,
                         cashbackType: patient.cashbackType,
                         maxDiscountRate: patient.maxDiscountRate,
+                        source: patient.source,
                         comment: patient.comment
                     }).then(function (result) {
                         patient.id = result.insertId;
@@ -110,6 +130,36 @@ module.exports = {
         return next();
     },
 
+    editPatient: function (req, res, next) {
+        var patient = req.body;
+        businessPeopleDAO.findPatientBasicInfoBy(patient.mobile).then(function (basicInfos) {
+            var basicInfoId = basicInfos[0].id;
+            return businessPeopleDAO.updatePatientBasicInfo({
+                id: basicInfoId,
+                name: patient.name,
+                mobile: patient.mobile,
+                birthday: patient.birthday,
+                gender: patient.gender,
+                idCard: patient.idCard,
+                headPic: patient.headPic,
+                address: patient.address
+            });
+        }).then(function () {
+            return patientDAO.updatePatient({
+                id: patient.id,
+                memberType: patient.memberType,
+                groupId: patient.groupId,
+                recommender: patient.recommenderId,
+                consumptionLevel: patient.consumptionLevel,
+                cashbackType: patient.cashbackType,
+                maxDiscountRate: patient.maxDiscountRate,
+                source: patient.source,
+                comment: patient.comment
+            })
+        }).then(function () {
+            res.send({ret: 0, message: i18n.get('patient.update.success')});
+        })
+    },
     addPrePaidHistory: function (req, res, next) {
         var prePaid = req.body;
         prePaid.createDate = new Date();
@@ -126,8 +176,11 @@ module.exports = {
                     hospitalId: req.user.hospitalId,
                     patientId: prePaid.patientId,
                     patientBasicInfoId: patients[0].patientBasicInfoId,
+                    paymentType: prePaid.paymentType,
                     type: 1,
-                    comment: prePaid.comment
+                    invoice: prePaid.invoice,
+                    comment: prePaid.comment,
+                    transactionNo: moment().format('YYYYMMDDhhmmss') + '-' + hospitalId + '-' + patientId
                 })
             })
         }).then(function (result) {
@@ -139,13 +192,28 @@ module.exports = {
         var patientId = req.params.patientId;
         var data = {};
         patientDAO.findByPatientBasicInfo(+patientId, +req.user.hospitalId).then(function (patients) {
-            data.basicInfo = patients[0];
+            data.basicInfo = (patients.length ? patients[0] : {});
+            if (data.basicInfo) {
+                data.basicInfo.cashbackTypeName = data.basicInfo.cashbackType && config.cashbackType[data.basicInfo.cashbackType];
+                data.basicInfo.genderName = data.basicInfo.gender && config.gender[data.basicInfo.gender];
+                data.basicInfo.memberTypeName = data.basicInfo.memberType && config.memberType[data.basicInfo.memberType];
+                data.basicInfo.sourceName = data.basicInfo.source && config.sourceType[data.basicInfo.source];
+                data.basicInfo.consumptionLevelName = data.basicInfo.consumptionLevel && config.consumptionLevel[data.basicInfo.consumptionLevel];
+            }
             return patientDAO.findTransactionFlows(+patientId, +req.user.hospitalId);
         }).then(function (flows) {
             data.transactionFlows = flows;
+            data.transactionFlows && data.transactionFlows.forEach(function (flow) {
+                flow.paymentType = config.paymentType[flow.paymentType];
+                flow.type = config.transactionType[flow.type];
+            });
             return patientDAO.findRegistrations(+patientId, +req.user.hospitalId);
         }).then(function (registrations) {
             data.outPatients = registrations;
+            registrations && registrations.forEach(function (registration) {
+                registration.registrationType = config.registrationType[registration.registrationType];
+                registration.status = registration.status == null ? null : config.preRegistrationStatus[registration.status];
+            });
             res.send({ret: 0, data: data});
         });
         return next();

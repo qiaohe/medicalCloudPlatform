@@ -173,6 +173,9 @@ module.exports = {
             from: +req.query.from,
             size: +req.query.size
         }).then(function (registrations) {
+            registrations && registrations.forEach(function (registration) {
+                registration.status = registration.status == null ? null : config.preRegistrationStatus[registration.status];
+            });
             res.send({ret: 0, data: registrations});
         });
         return next();

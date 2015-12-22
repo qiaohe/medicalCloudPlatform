@@ -243,6 +243,12 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "get",
+        path: "/api/groupCompanies/:id",
+        handler: patientController.getGroupCompany,
+        secured: 'user'
+    },
+    {
         method: "post",
         path: "/api/groupCompanies",
         handler: patientController.insertGroupCompany,
@@ -303,6 +309,12 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "put",
+        path: "/api/patients",
+        handler: patientController.editPatient,
+        secured: 'user'
+    },
+    {
         method: "post",
         path: "/api/prePaidHistories",
         handler: patientController.addPrePaidHistory,
@@ -313,5 +325,48 @@ module.exports = [
         path: "/api/patients/:patientId",
         handler: patientController.getPatient,
         secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/roles",
+        handler: dictController.getRoles,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/roles/:roleId/jobTitles",
+        handler: dictController.getJobTitlesByRole,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/doctors/:doctorId/shiftPlans",
+        handler: hospitalController.addShitPlans,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/pc/doctors/:doctorId/shiftPlans",
+        handler: hospitalController.getShiftPlansOfDoctor,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/doctors/:doctorId/days/:day/shiftPlans",
+        handler: hospitalController.getShiftPlansOfDay,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/performances",
+        handler: hospitalController.getPerformances,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/performances",
+        handler: hospitalController.addPerformances,
+        secured: 'user'
     }
+
 ];

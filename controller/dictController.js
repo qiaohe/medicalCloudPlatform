@@ -60,6 +60,19 @@ module.exports = {
             res.send({ret: 0, data: cities});
         });
         return next();
-
+    },
+    getRoles: function (req, res, next) {
+        var hospitalId = req.user.hospitalId;
+        hospitalDAO.findRoles(hospitalId).then(function (roles) {
+            res.send({ret: 0, data: roles});
+        });
+        return next();
+    },
+    getJobTitlesByRole: function (req, res, next) {
+        hospitalDAO.findJobTitleByRole(req.user.hospitalId, req.params.roleId).then(function (jobTitles) {
+            res.send({ret: 0, data: jobTitles});
+        });
+        return next();
     }
+
 }
