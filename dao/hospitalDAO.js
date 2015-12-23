@@ -69,7 +69,7 @@ module.exports = {
         return db.query(sqlMapping.registration.addShiftPlan, shiftPlan);
     },
     findShiftPlansBy: function (hospitalId, doctorId) {
-        return db.query(sqlMapping.registration.findShiftPlans, [+hospitalId, +doctorId]);
+        return db.query(sqlMapping.registration.findShiftPlans, [hospitalId, doctorId]);
     },
     findShiftPlansByDay: function (hospitalId, doctorId, day) {
         return db.query(sqlMapping.registration.findShiftPlansByDay, [+hospitalId, +doctorId, day]);

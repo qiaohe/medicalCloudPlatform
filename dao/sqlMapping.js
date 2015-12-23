@@ -4,7 +4,7 @@ module.exports = {
         insert: 'insert Employee set ?',
         findByRole: 'select id, name from Employee where role=?',
         updateEmployee: 'update Employee set ? where id = ?',
-        findEmployees: 'select * from Employee where status <> 2 and hospitalId =? order by createDate desc limit ?,?',
+        findEmployees: 'select e.id, e.`name`, d.`name` as department, e.mobile, e.gender, e.birthday, job.`name` as jobTitle, role.`name` as role, e.`status`, e.maxDiscountRate  from Employee e LEFT JOIN Department d on d.id = e.department left JOIN Role role on role.id = e.role left JOIN JobTitle job on job.id = e.jobTitle where e.`status` <> 2 and e.hospitalId =? order by e.createDate desc limit ?,?',
         findRoles: 'select id, name from Role where hospitalId = ?',
         findJobTitleByRole: 'select id, name from JobTitle where hospitalId = ? and role =?'
     },
@@ -53,7 +53,7 @@ module.exports = {
 
     doctor: {
         findDoctors: 'select id, name from Doctor',
-        findDoctorsByHospital: 'select SQL_CALC_FOUND_ROWS d.*, e.birthday, e.clinic, e.mobile from Doctor d, Employee e where e.id = d.employeeId and d.status <> 2 and d.hospitalId = ? limit ?, ?',
+        findDoctorsByHospital: 'select SQL_CALC_FOUND_ROWS d.*, e.birthday, e.clinic, e.mobile from Doctor d, Employee e where e.id = d.employeeId and d.status <> 2 and d.hospitalId = ? order by d.createDate limit ?, ?',
         findDoctorsGroupByDepartment: 'select id, name, departmentName from Doctor where status <> 2 and hospitalId = ?',
         findByDepartment: 'select id, name, departmentName, hospitalName, headPic,registrationFee, speciality,jobTitle from Doctor where hospitalId = ?  and departmentId = ?',
         findById: 'select id, name, departmentName,hospitalId, hospitalName, headPic,registrationFee, speciality,jobTitle, departmentId, jobTitleId from Doctor where id =?',

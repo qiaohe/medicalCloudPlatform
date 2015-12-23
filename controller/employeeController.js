@@ -51,6 +51,10 @@ module.exports = {
             size: pageSize
         }).then(function (empoyees) {
             if (!empoyees.rows.length) return res.send({ret: 0, data: []});
+            empoyees.rows.forEach(function(employee){
+                employee.status = config.employeeStatus[employee.status];
+                employee.gender = config.gender[employee.gender];
+            });
             empoyees.pageIndex = pageIndex;
             res.send({ret: 0, data: empoyees});
         });
@@ -68,6 +72,7 @@ module.exports = {
             doctors.rows && doctors.rows.forEach(function (doctor) {
                 doctor.gender = config.gender[doctor.gender];
                 doctor.images = doctor.images && doctor.images.split(',');
+                doctor.status = config.employeeStatus[doctor.status];
             });
             doctors.pageIndex = pageIndex;
             res.send({ret: 0, data: doctors});

@@ -99,7 +99,7 @@ module.exports = {
         return next();
     },
     getShiftPlansOfDoctor: function (req, res, next) {
-        var doctorId = req.params.doctorId;
+        var doctorId = +req.params.doctorId;
         var hospitalId = req.user.hospitalId;
         hospitalDAO.findShiftPlansBy(hospitalId, doctorId).then(function (plans) {
             var result = _.groupBy(plans, function (plan) {
