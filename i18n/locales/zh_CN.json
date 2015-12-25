@@ -38,8 +38,10 @@
   "doctor.update.success": "doctor.update.success",
   "doctor.delete.success": "doctor.delete.success",
   "prePaid.add.success": "prePaid.add.success",
-  "shiftPlan.add.success": "shiftPlan.add.success",
   "shiftPlan.add.success": "排班信息添加成功",
-  "performance.add.success":"业务人员任务设置成功",
-  "patient.update.success":"更新患者信息成功"
+  "performance.add.success": "业务人员任务设置成功",
+  "patient.update.success": "更新患者信息成功",
+  "doctor.shift.plan.invalid": "当时时段医生无排班",
+  "employee.update.success": "员工信息更新成功",
+  "outpatientStatus.change.success": "门诊状态修改成功"
 }

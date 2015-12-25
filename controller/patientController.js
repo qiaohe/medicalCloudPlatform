@@ -212,7 +212,7 @@ module.exports = {
             data.outPatients = registrations;
             registrations && registrations.forEach(function (registration) {
                 registration.registrationType = config.registrationType[registration.registrationType];
-                registration.status = registration.status == null ? null : config.preRegistrationStatus[registration.status];
+                registration.status = registration.status == null ? null : config.registrationStatus[registration.status];
             });
             res.send({ret: 0, data: data});
         });

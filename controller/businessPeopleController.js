@@ -124,14 +124,24 @@ module.exports = {
         }).then(function (patientBasicInfoList) {
             if (patientBasicInfoList.length) {
                 registration.patientBasicInfoId = patientBasicInfoList[0].id;
-                return businessPeopleDAO.insertRegistration(registration);
+                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':incr').then(function (seq) {
+                    registration.sequence = seq;
+                    registration.outPatientType = 0;
+                    registration.outpatientStatus = 5;
+                    return businessPeopleDAO.insertRegistration(registration);
+                });
             }
             businessPeopleDAO.insertPatientBasicInfo({
                 name: registration.patientName, mobile: registration.patientMobile,
                 createDate: new Date(), password: md5('password'), creator: req.user.id
             }).then(function (result) {
                 registration.patientBasicInfoId = result.insertId;
-                return businessPeopleDAO.insertRegistration(registration);
+                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':incr').then(function (seq) {
+                    registration.sequence = seq;
+                    registration.outPatientType = 0;
+                    registration.outpatientStatus = 5;
+                    return businessPeopleDAO.insertRegistration(registration)
+                });
             });
         }).then(function (result) {
             return businessPeopleDAO.updateShiftPlan(registration.doctorId, registration.registerDate, registration.shiftPeriod);
@@ -174,7 +184,7 @@ module.exports = {
             size: +req.query.size
         }).then(function (registrations) {
             registrations && registrations.forEach(function (registration) {
-                registration.status = registration.status == null ? null : config.preRegistrationStatus[registration.status];
+                registration.status = registration.status == null ? null : config.registrationStatus[registration.status];
             });
             res.send({ret: 0, data: registrations});
         });

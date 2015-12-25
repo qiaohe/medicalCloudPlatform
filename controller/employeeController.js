@@ -51,7 +51,7 @@ module.exports = {
             size: pageSize
         }).then(function (empoyees) {
             if (!empoyees.rows.length) return res.send({ret: 0, data: []});
-            empoyees.rows.forEach(function(employee){
+            empoyees.rows.forEach(function (employee) {
                 employee.status = config.employeeStatus[employee.status];
                 employee.gender = config.gender[employee.gender];
             });
@@ -80,6 +80,15 @@ module.exports = {
         return next();
     },
 
+    getEmployeeById: function (req, res, next) {
+        var id = req.params.id;
+        var hospitalId = req.user.hospitalId;
+        employeeDAO.findById(id, hospitalId).then(function (employees) {
+            var employee = employees[0];
+            res.send({ret: 0, data: employee});
+        })
+    },
+
     deleteDoctor: function (req, res, next) {
         employeeDAO.deleteDoctor(req.params.id).then(function (result) {
             res.send({ret: 0, message: i18n.get('doctor.delete.success')});
@@ -101,13 +110,12 @@ module.exports = {
         var hospitalId = req.user.hospitalId;
         employeeDAO.findDoctorsGroupByDepartment(hospitalId).then(function (doctors) {
             if (!doctors.length) return res.send({ret: 0, data: doctors});
-            res.send({
-                ret: 0, data: _.groupBy(doctors, function (item) {
-                    var s = item.departmentName;
-                    delete item.departmentName;
-                    return s;
-                })
-            });
+            var data = _.groupBy(doctors, 'departmentName');
+            var result = [];
+            for (var key in data) {
+                result.push({department: key, doctors: data[key]})
+            }
+            res.send({ret: 0, data: result});
         });
     }
 }

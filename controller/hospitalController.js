@@ -3,6 +3,7 @@ var config = require('../config');
 var redis = require('../common/redisClient');
 var i18n = require('../i18n/localeMessage');
 var hospitalDAO = require('../dao/hospitalDAO');
+var registrationDAO = require('../dao/registrationDAO');
 var _ = require('lodash');
 var moment = require('moment');
 var Promise = require("bluebird");
@@ -102,11 +103,16 @@ module.exports = {
         var doctorId = +req.params.doctorId;
         var hospitalId = req.user.hospitalId;
         hospitalDAO.findShiftPlansBy(hospitalId, doctorId).then(function (plans) {
-            var result = _.groupBy(plans, function (plan) {
+            var planItems = _.groupBy(plans, function (plan) {
                 var d = plan.day;
                 delete plan.day;
-                return moment(plan.day).format('YYYY-MM-DD');
-            })
+                return moment(d).format('YYYY-MM-DD');
+            });
+            var result = [];
+            for (var item in planItems) {
+                var pq = _.sum(planItems[item], 'plannedQuantity');
+                result.push({day: item, title: (pq == 0 ? '0(休假)' : pq + '(总数)')});
+            }
             return res.send({ret: 0, data: result});
         });
         return next();
@@ -122,6 +128,7 @@ module.exports = {
         });
         return next();
     },
+
     addShitPlans: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
         var days = req.body.days;
@@ -202,6 +209,52 @@ module.exports = {
             return hospitalDAO.addPerformance(performance);
         }).then(function () {
             res.send({ret: 0, message: i18n.get('performance.add.success')});
+        });
+        return next();
+    },
+    getOutpatients: function (req, res, next) {
+        var doctorId = req.user.id;
+        var today = moment().format('YYYY-MM-DD');
+        var result = {
+            finishedCount: 0,
+            waitQueueCount: 0,
+            availableCount: 0,
+            authorizedCount: 0,
+            availableAuthorizedCount: 0
+        };
+        hospitalDAO.findWaitOutpatients(doctorId, today).then(function (items) {
+            result.waitQueue = items;
+            result.currentQuue = (items.length ? items[0] : []);
+            result.waitQueueCount = items.length;
+            return hospitalDAO.findHistoryOutpatients(doctorId)
+        }).then(function (histories) {
+            result.historyQueue = histories;
+            return hospitalDAO.findFinishedCountByDate(doctorId, today)
+        }).then(function (finishCount) {
+            result.finishedCount = finishCount[0].count;
+            return hospitalDAO.findShiftPlansByDayWithName(req.user.hospitalId, doctorId, today);
+        }).then(function (plans) {
+            result.availableCount = _.sum(plans, 'restQuantity');
+            result.shiftPlans = plans;
+            res.send({ret: 0, data: result});
+        });
+        return next();
+    },
+    //finishOutpatient: function (req, res, next) {
+    //    var doctorId = req.user.id;
+    //    var today = moment().format('YYYY-MM-DD');
+    //    var rid = req.params.rid;
+    //    registrationDAO.updateRegistration({id: rid, finishDate: new Date()}).then(function () {
+    //        hospitalDAO.findWaitOutpatients(doctorId, today).then(function (items) {
+    //            res.send({ret: 0, data: (items.length ? items[0] : [])})
+    //        });
+    //    });
+    //    return next();
+    //},
+    changeOutPatientStatus: function (req, res, next) {
+        req.body.finishDate = new Date();
+        registrationDAO.updateRegistration(req.body).then(function (result) {
+            res.send({ret: 0, message: i18n.get('outpatientStatus.change.success')});
         });
         return next();
     }

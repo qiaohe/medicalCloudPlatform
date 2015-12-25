@@ -36,7 +36,12 @@ module.exports = [
         handler: employeeController.getEmployees,
         secured: 'user'
     },
-
+    {
+        method: "get",
+        path: "/api/employees/:id",
+        handler: employeeController.getEmployeeById,
+        secured: 'user'
+    },
     {
         method: "put",
         path: "/api/employees",
@@ -162,6 +167,12 @@ module.exports = [
         method: "post",
         path: "/api/registrations/:rid",
         handler: registrationController.changeRegistration,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/registrations",
+        handler: hospitalController.changeOutPatientStatus,
         secured: 'user'
     },
     {
@@ -366,6 +377,12 @@ module.exports = [
         method: "post",
         path: "/api/performances",
         handler: hospitalController.addPerformances,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/outPatients",
+        handler: hospitalController.getOutpatients,
         secured: 'user'
     }
 

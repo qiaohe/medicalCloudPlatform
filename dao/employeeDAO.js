@@ -20,6 +20,10 @@ module.exports = {
     findDoctorsByHospital: function (hospital, page) {
         return db.queryWithCount(sqlMapping.doctor.findDoctorsByHospital, [hospital, page.from, page.size])
     },
+
+    findById: function (id, hospitalId) {
+        return db.query(sqlMapping.employee.findById, [id, hospitalId]);
+    },
     findDoctorsGroupByDepartment: function (hospitalId) {
         return db.query(sqlMapping.doctor.findDoctorsGroupByDepartment, hospitalId);
     },

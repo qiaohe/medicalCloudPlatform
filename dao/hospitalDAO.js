@@ -74,10 +74,25 @@ module.exports = {
     findShiftPlansByDay: function (hospitalId, doctorId, day) {
         return db.query(sqlMapping.registration.findShiftPlansByDay, [+hospitalId, +doctorId, day]);
     },
+    findShiftPlansByDayWithName: function (hospitalId, doctorId, day) {
+        return db.query(sqlMapping.registration.findShiftPlansByDayWithName, [+hospitalId, +doctorId, day]);
+    },
+
     findPerformances: function (hospitalId, conditions) {
         return db.query(sqlMapping.businessPeople.findPerformances + (conditions.length ? ' and ' + conditions : '') + '  order by name, yearMonth', hospitalId);
     },
     addPerformance: function (performance) {
         return db.query(sqlMapping.businessPeople.insertPerformance, performance)
+    },
+
+    findWaitOutpatients: function (doctorId, registerDate) {
+        return db.query(sqlMapping.doctor.findWaitOutpatients, [doctorId, registerDate])
+    },
+    findFinishedCountByDate:function (doctorId, registerDate) {
+        return db.query(sqlMapping.doctor.findFinishedCountByDate, [doctorId, registerDate])
+    },
+
+    findHistoryOutpatients: function (doctorId) {
+        return db.query(sqlMapping.doctor.findHistoryOutpatients, doctorId)
     }
 }

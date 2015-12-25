@@ -37,6 +37,15 @@ module.exports = {
     updateShiftPlan: function (doctorId, registerDate, shiftPeriod) {
         return db.query(sqlMapping.businessPeople.updateShiftPlan, [doctorId, registerDate, shiftPeriod])
     },
+    updateShiftPlanDec: function (doctorId, registerDate, shiftPeriod) {
+        return db.query(sqlMapping.businessPeople.updateShiftPlanDec, [doctorId, registerDate, shiftPeriod])
+    },
+    findRegistrationById: function (rid) {
+        return db.query(sqlMapping.businessPeople.findRegistrationById, rid);
+    },
+    findShiftPlanByDoctorAndShiftPeriod: function (doctorId, day, shiftPeriod) {
+        return db.query(sqlMapping.businessPeople.findShiftPlanByDoctorAndShiftPeriod, [doctorId, day, shiftPeriod]);
+    },
     findPatientBasicInfoBy: function (mobile) {
         return db.query(sqlMapping.businessPeople.findPatientBasicInfoBy, mobile)
     },
@@ -63,13 +72,13 @@ module.exports = {
         return db.query(sqlMapping.businessPeople.findShiftPeriods, hospitalId);
     },
     transferContact: function (toBusinessPeopleId, contacts) {
-        return db.query(sqlMapping.businessPeople.transferContact + '(' + contacts+ ')', [toBusinessPeopleId, contacts]);
+        return db.query(sqlMapping.businessPeople.transferContact + '(' + contacts + ')', [toBusinessPeopleId, contacts]);
     },
 
     addTransferHistory: function (history) {
         return db.query(sqlMapping.businessPeople.addTransferHistory, history);
     },
-    updatePatientBasicInfo: function(patientBasicInfo) {
+    updatePatientBasicInfo: function (patientBasicInfo) {
         return db.query(sqlMapping.businessPeople.updatePatientBasicInfo, [patientBasicInfo, patientBasicInfo.id])
     }
 }

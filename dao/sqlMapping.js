@@ -6,9 +6,11 @@ module.exports = {
         updateEmployee: 'update Employee set ? where id = ?',
         findEmployees: 'select e.id, e.`name`, d.`name` as department, e.mobile, e.gender, e.birthday, job.`name` as jobTitle, role.`name` as role, e.`status`, e.maxDiscountRate  from Employee e LEFT JOIN Department d on d.id = e.department left JOIN Role role on role.id = e.role left JOIN JobTitle job on job.id = e.jobTitle where e.`status` <> 2 and e.hospitalId =? order by e.createDate desc limit ?,?',
         findRoles: 'select id, name from Role where hospitalId = ?',
+        findById: 'select * from Employee where id=? and hospitalId =?',
         findJobTitleByRole: 'select id, name from JobTitle where hospitalId = ? and role =?'
     },
     businessPeople: {
+        findRegistrationById: 'select * from Registration where id=?',
         updatePatientBasicInfo: 'update PatientBasicInfo set ? where id = ?',
         findRegistrationsByUid: 'select r.id, r.patientMobile, r.doctorId, doctorName, doctorHeadPic,registrationFee, departmentName,doctorJobTitle, hospitalName, patientName,concat(DATE_FORMAT(r.registerDate, \'%Y-%m-%c \') , s.`name`) as shiftPeriod, orderNo, r.status  from Registration r, ShiftPeriod s where r.shiftPeriod = s.id and creator = ? and r.registrationType <>7 order by r.id desc limit ?,?',
         findRegistrationsByUidAndMobile: 'select r.id, r.patientMobile, r.doctorId, doctorName, doctorHeadPic,registrationFee, departmentName,doctorJobTitle, hospitalName, patientName,concat(DATE_FORMAT(r.registerDate, \'%Y-%m-%d \') , s.`name`) as shiftPeriod, orderNo, r.status  from Registration r, ShiftPeriod s where r.shiftPeriod = s.id and creator = ? and r.patientMobile=? and r.registrationType =7 order by r.id desc limit ?,?',
@@ -18,6 +20,8 @@ module.exports = {
         insertPatientBasicInfo: 'insert PatientBasicInfo set ?',
         findPatientBasicInfoBy: 'select * from PatientBasicInfo where mobile=?',
         updateShiftPlan: 'update ShiftPlan set actualQuantity = actualQuantity + 1 where doctorId = ? and day =? and shiftPeriod = ?',
+        updateShiftPlanDec: 'update ShiftPlan set actualQuantity = actualQuantity - 1 where doctorId = ? and day =? and shiftPeriod = ?',
+        findShiftPlanByDoctorAndShiftPeriod: 'select * from ShiftPlan where doctorId=? and day=? and shiftPeriod =?',
         insertRegistration: 'insert Registration set ?',
         findContactById: 'select * from InvitationContact where id = ?',
         insertInvitation: 'insert Invitation set ?',
@@ -37,7 +41,7 @@ module.exports = {
     hospital: {
         findDepartments: 'select id, name from Department where hospitalId = ?',
         findByNameLike: 'select id, name, tag from Hospital where name like ?',
-        findById: 'select id, name, tag, images, address, icon, introduction from Hospital where id = ?',
+        findById: 'select id, name, tag, images, address, icon, introduction, trafficRoute from Hospital where id = ?',
         insertPatient: 'insert Patient set ?',
         findPatientByBasicInfoId: 'select * from Patient where patientBasicInfoId = ?',
         findJobTitles: 'select id, name from JobTitle where hospitalId =?',
@@ -60,13 +64,17 @@ module.exports = {
         findShitPlans: 'select p.`name` as period, `day`, actualQuantity, plannedQuantity, p.id as periodId from ShiftPlan sp, ShiftPeriod p where sp.shiftPeriod = p.id and sp.doctorId = ? and sp.day>=? and sp.day<=? and sp.actualQuantity < sp.plannedQuantity and sp.plannedQuantity > 0 order by sp.day, sp.shiftPeriod',
         findBy: 'select id, name, departmentName,hospitalId, hospitalName, headPic,registrationFee, speciality,jobTitle from Doctor where departmentId=? and registrationFee=? and id<>?',
         update: 'update Doctor set ? where id = ?',
-        delete: 'delete from Doctor where id=?'
+        delete: 'delete from Doctor where id=?',
+        findWaitOutpatients: 'select r.id, r.patientName, r.patientMobile, r.gender, p.birthday, r.sequence, r.registrationType, r.`comment`, r.outPatientType, r.createDate, r.businessPeopleName as recommender from Registration r LEFT JOIN  PatientBasicInfo p on p.id = r.patientBasicInfoId where r.doctorId = ? and r.registerDate=? and r.outPatientStatus in (0, 5) order by r.sequence',
+        findFinishedCountByDate: 'select count(*) as count from Registration r where r.doctorId = ? and r.registerDate=? and r.outPatientStatus=1',
+        findHistoryOutpatients: 'select r.id, r.patientName, r.patientMobile, r.gender, p.birthday, r.sequence, r.registrationType, r.`comment`, r.outPatientType, r.createDate, r.businessPeopleName as recommender from Registration r LEFT JOIN  PatientBasicInfo p on p.id = r.patientBasicInfoId where r.doctorId = ? and r.outPatientStatus = 1 order by r.registerDate, r.sequence'
     },
 
     registration: {
         addShiftPlan: 'insert ShiftPlan set ?',
         findShiftPlans: 'select day, shiftPeriod, actualQuantity, plannedQuantity from ShiftPlan where hospitalId = ? and doctorId = ? order by day desc',
         findShiftPlansByDay: 'select shiftPeriod, actualQuantity, plannedQuantity from ShiftPlan where hospitalId = ? and doctorId = ? and day = ? order by shiftPeriod desc',
+        findShiftPlansByDayWithName: 'select shiftPeriod,s2.`name` as shiftPeriodName,plannedQuantity - actualQuantity as restQuantity from ShiftPlan s1, ShiftPeriod s2 where s1.shiftPeriod = s2.id and s1.hospitalId = ? and s1.doctorId = ? and s1.day = ? order by s1.shiftPeriod desc',
         insert: 'insert Registration set ?',
         updateShiftPlan: 'update ShiftPlan set actualQuantity = actualQuantity + 1 where doctorId = ? and day =? and shiftPeriod = ?',
         updateShiftPlanDec: 'update ShiftPlan set actualQuantity = actualQuantity - 1 where doctorId = ? and day =? and shiftPeriod = ?',
@@ -74,9 +82,9 @@ module.exports = {
         findRegistrationsByUid: 'select r.id, r.doctorId, doctorName, doctorHeadPic,registrationFee, departmentName,doctorJobTitle, hospitalName, patientName,concat(DATE_FORMAT(r.registerDate, \'%Y-%m-%c \') , s.`name`) as shiftPeriod, orderNo, r.status  from Registration r, ShiftPeriod s where r.shiftPeriod = s.id and paymentType =1 and patientBasicInfoId = ? and r.status <>4 order by r.id desc limit ?,?',
         findById: 'select * from Registration where id =?',
         updateRegistration: "update Registration set ? where id = ?",
-        findRegistrations: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.preRegistrationStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? limit ?, ?',
+        findRegistrations: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.outpatientStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? limit ?, ?',
         findRegistrationsById: 'select * from Registration where id=?',
-        findRegistrationsBy: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.preRegistrationStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? and r.registerDate=? limit ?, ?'
+        findRegistrationsBy: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.outpatientStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? and r.registerDate=? limit ?, ?'
     },
     patient: {
         updatePatient: 'update Patient set ? where id = ?',
