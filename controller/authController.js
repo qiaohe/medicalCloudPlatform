@@ -11,9 +11,10 @@ module.exports = {
     login: function (req, res, next) {
         var userName = (req.body && req.body.username) || (req.query && req.query.username);
         var password = (req.body && req.body.password) || (req.query && req.query.password);
+        var user = {};
         employeeDAO.findByUsername(userName).then(function (users) {
             if (!users || !users.length) return res.send({ret: 0, message: i18n.get('member.not.exists')});
-            var user = users[0];
+            user = users[0];
             if (user.password != md5(password)) return res.send({
                 ret: 0, message: i18n.get('member.password.error')
             });
@@ -21,6 +22,10 @@ module.exports = {
             redis.set(token, JSON.stringify(user));
             redis.expire(token, config.app.tokenExpire);
             user.token = token;
+            return redis.getAsync('uid:' + user.id + ':lastLogin');
+        }).then(function(result){
+            redis.set('uid:' + user.id + ':lastLogin', new Date().getTime());
+            user.lastLoginDate = result;
             res.send({ret: 0, data: user});
         });
         return next();

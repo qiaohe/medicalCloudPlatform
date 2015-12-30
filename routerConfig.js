@@ -374,9 +374,21 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "get",
+        path: "/api/businessPeoples/:id/performances",
+        handler: hospitalController.getPerformancesBy,
+        secured: 'user'
+    },
+    {
         method: "post",
         path: "/api/performances",
         handler: hospitalController.addPerformances,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/performances",
+        handler: hospitalController.editPerformances,
         secured: 'user'
     },
     {
@@ -384,6 +396,11 @@ module.exports = [
         path: "/api/outPatients",
         handler: hospitalController.getOutpatients,
         secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/myRegistrations",
+        handler: registrationController.getRegistrationsOfDoctor,
+        secured: 'user'
     }
-
 ];

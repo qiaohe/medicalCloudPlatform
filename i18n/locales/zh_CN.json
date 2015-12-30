@@ -43,5 +43,8 @@
   "patient.update.success": "更新患者信息成功",
   "doctor.shift.plan.invalid": "当时时段医生无排班",
   "employee.update.success": "员工信息更新成功",
-  "outpatientStatus.change.success": "门诊状态修改成功"
+  "outpatientStatus.change.success": "门诊状态修改成功",
+  "prePaid.add.success": "充值交易成功",
+  "performance.edit.success":"业务人员业绩修改成功"
+
 }

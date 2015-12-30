@@ -154,6 +154,7 @@ module.exports = {
                         patientBasicInfoId: registration.patientBasicInfoId,
                         hospitalId: req.user.hospitalId,
                         memberType: 1,
+                        balance: 0.00,
                         memberCardNo: req.user.hospitalId.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                         createDate: new Date()
                     });

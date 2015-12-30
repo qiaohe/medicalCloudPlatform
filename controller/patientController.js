@@ -7,15 +7,29 @@ var businessPeopleDAO = require('../dao/businessPeopleDAO');
 var _ = require('lodash');
 var md5 = require('md5');
 var moment = require('moment');
+function getConditions(req) {
+    var conditions = [];
+    if (req.query.memberType) conditions.push('p.memberType=' + req.query.memberType);
+    if (req.query.source) conditions.push('p.source=' + req.query.source);
+    if (req.query.groupId) conditions.push('p.groupId=' + req.query.groupId);
+    if (req.query.consumptionLevel) conditions.push('p.consumptionLevel=' + req.query.consumptionLevel);
+    if (req.query.recommender) conditions.push('r.recommender=' + req.query.recommender);
+    if (req.query.name) conditions.push('pb.name like \'%' + req.query.name + '%\'');
+    if (req.query.mobile) conditions.push('pb.mobile like \'%' + req.query.mobile + '%\'');
+    return conditions;
+}
 module.exports = {
     getGroupCompanies: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
         var pageIndex = +req.query.pageIndex;
         var pageSize = +req.query.pageSize;
+        var conditions = [];
+        if (req.query.name) conditions.push('gc.name like \'%' + req.query.name + '%\'');
+        if (req.query.contactMobile) conditions.push('gc.contactMobile like \'%' + req.query.contactMobile + '%\'');
         patientDAO.findGroupCompanies(hospitalId, {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
-        }).then(function (companies) {
+        }, conditions).then(function (companies) {
             if (!companies.rows.length) return res.send({ret: 0, data: []});
             companies.rows.forEach(function (company) {
                 company.source = config.sourceType[company.source];
@@ -69,11 +83,12 @@ module.exports = {
         patientDAO.findPatients(hospitalId, {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
-        }).then(function (patients) {
+        }, getConditions(req)).then(function (patients) {
             if (!patients.rows.length) return res.send({ret: 0, data: []});
             patients.rows.forEach(function (p) {
                 p.memberType = p.memberType && config.memberType[p.memberType];
                 p.source = p.source && config.sourceType[p.source];
+                p.gender = p.gender && config.gender[p.gender];
                 p.consumptionLevel = p.consumptionLevel && config.consumptionLevel[p.consumptionLevel];
             })
             patients.pageIndex = pageIndex;
@@ -119,6 +134,7 @@ module.exports = {
                         cashbackType: patient.cashbackType,
                         maxDiscountRate: patient.maxDiscountRate,
                         source: patient.source,
+                        balance: 0.00,
                         comment: patient.comment
                     }).then(function (result) {
                         patient.id = result.insertId;
@@ -173,14 +189,14 @@ module.exports = {
                 return patientDAO.insertTransactionFlow({
                     amount: prePaid.amount,
                     createDate: new Date(),
-                    hospitalId: req.user.hospitalId,
+                    hospitalId: prePaid.hospitalId,
                     patientId: prePaid.patientId,
                     patientBasicInfoId: patients[0].patientBasicInfoId,
                     paymentType: prePaid.paymentType,
                     type: 1,
                     invoice: prePaid.invoice,
                     comment: prePaid.comment,
-                    transactionNo: moment().format('YYYYMMDDhhmmss') + '-' + hospitalId + '-' + patientId
+                    transactionNo: moment().format('YYYYMMDDhhmmss') + '-' + prePaid.hospitalId + '-' + prePaid.patientId
                 })
             })
         }).then(function (result) {

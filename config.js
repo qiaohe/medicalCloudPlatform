@@ -21,7 +21,7 @@ module.exports = {
         tokenExpire: 8640000
     },
     redis: {
-        host: '121.42.171.213',
+        host: '127.0.0.1',
         port: 6379
     },
     qiniu: {

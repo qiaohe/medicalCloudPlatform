@@ -13,8 +13,8 @@ module.exports = {
     findByUsername: function (username) {
         return db.query(sqlMapping.employee.findByUserName, username);
     },
-    findDepartmentsBy: function (hospitalId) {
-        return db.query(sqlMapping.department.findByHospital, hospitalId);
+    findDepartmentsBy: function (hospitalId, page) {
+        return db.queryWithCount(sqlMapping.department.findByHospital, [hospitalId, page.from, page.size]);
     },
 
     findDoctorsByDepartment: function (hospitalId, departmentId) {
@@ -81,14 +81,23 @@ module.exports = {
     findPerformances: function (hospitalId, conditions) {
         return db.query(sqlMapping.businessPeople.findPerformances + (conditions.length ? ' and ' + conditions : '') + '  order by name, yearMonth', hospitalId);
     },
+
+    findPerformancesBy: function(businessPeopleId) {
+        return db.query(sqlMapping.businessPeople.findPerformancesBy, businessPeopleId);
+
+    },
     addPerformance: function (performance) {
-        return db.query(sqlMapping.businessPeople.insertPerformance, performance)
+        return db.query(sqlMapping.businessPeople.insertPerformance, performance);
+    },
+
+    updatePerformance: function (performance) {
+        return db.query(sqlMapping.businessPeople.updatePerformance, [performance.plannedCount, performance.businessPeopleId, performance.yearMonth]);
     },
 
     findWaitOutpatients: function (doctorId, registerDate) {
         return db.query(sqlMapping.doctor.findWaitOutpatients, [doctorId, registerDate])
     },
-    findFinishedCountByDate:function (doctorId, registerDate) {
+    findFinishedCountByDate: function (doctorId, registerDate) {
         return db.query(sqlMapping.doctor.findFinishedCountByDate, [doctorId, registerDate])
     },
 

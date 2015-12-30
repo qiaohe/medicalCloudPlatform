@@ -10,7 +10,13 @@ var Promise = require("bluebird");
 module.exports = {
     getDepartments: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
-        hospitalDAO.findDepartmentsBy(hospitalId).then(function (departments) {
+        var pageIndex = +req.query.pageIndex;
+        var pageSize = +req.query.pageSize;
+        hospitalDAO.findDepartmentsBy(hospitalId, {
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        }).then(function (departments) {
+            departments.pageIndex = pageIndex;
             return res.send({ret: 0, data: departments});
         });
         return next();
@@ -111,7 +117,7 @@ module.exports = {
             var result = [];
             for (var item in planItems) {
                 var pq = _.sum(planItems[item], 'plannedQuantity');
-                result.push({day: item, title: (pq == 0 ? '0(休假)' : pq + '(总数)')});
+                result.push({day: item, title: pq});
             }
             return res.send({ret: 0, data: result});
         });
@@ -169,13 +175,11 @@ module.exports = {
             performances.length && performances.forEach(function (p) {
                 var item = _.findWhere(data, {
                     businessPeopleId: p.businessPeopleId,
-                    department: p.department,
                     name: p.name
                 });
                 if (!item) {
                     item = {
                         businessPeopleId: p.businessPeopleId,
-                        department: p.department,
                         name: p.name,
                         performances: []
                     };
@@ -192,6 +196,36 @@ module.exports = {
         });
         return next();
     },
+
+    getPerformancesBy: function (req, res, next) {
+        var businessPeopleId = req.params.id;
+        hospitalDAO.findPerformancesBy(businessPeopleId).then(function (performances) {
+            var data = [];
+            performances.length && performances.forEach(function (p) {
+                var item = _.findWhere(data, {
+                    businessPeopleId: p.businessPeopleId,
+                    name: p.name
+                });
+                if (!item) {
+                    item = {
+                        businessPeopleId: p.businessPeopleId,
+                        name: p.name,
+                        performances: []
+                    };
+                    data.push(item);
+                }
+                item.performances.push({
+                    actualCount: p.actualCount,
+                    plannedCount: p.plannedCount,
+                    yearMonth: p.yearMonth,
+                    completePercentage: p.completePercentage
+                });
+            });
+            res.send({ret: 0, data: data});
+        });
+        return next();
+    },
+
     addPerformances: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
         var ps = [];
@@ -212,6 +246,16 @@ module.exports = {
         });
         return next();
     },
+
+    editPerformances: function (req, res, next) {
+        Promise.map(req.body.data, function (performance) {
+            performance.businessPeopleId = req.body.businessPeopleId;
+            return hospitalDAO.updatePerformance(performance);
+        }).then(function () {
+            res.send({ret: 0, message: i18n.get('performance.add.success')});
+        });
+        return next();
+    },
     getOutpatients: function (req, res, next) {
         var doctorId = req.user.id;
         var today = moment().format('YYYY-MM-DD');
@@ -223,11 +267,33 @@ module.exports = {
             availableAuthorizedCount: 0
         };
         hospitalDAO.findWaitOutpatients(doctorId, today).then(function (items) {
+            items.length && items.forEach(function (item) {
+                item.gender = config.gender[item.gender];
+                item.registrationType = config.registrationType[item.registrationType];
+                item.outPatientType = config.outPatientType[item.outPatientType];
+                item.outpatientStatus = config.outpatientStatus[item.outpatientStatus];
+            });
             result.waitQueue = items;
-            result.currentQuue = (items.length ? items[0] : []);
             result.waitQueueCount = items.length;
-            return hospitalDAO.findHistoryOutpatients(doctorId)
+            if (items.length) {
+                return registrationDAO.findCurrentQueueByRegId(items[0].id).then(function (rs) {
+                    rs[0].registrationType = config.registrationType[rs[0].registrationType];
+                    rs[0].outPatientType = config.outPatientType[rs[0].outPatientType];
+                    rs[0].outpatientStatus = config.outpatientStatus[rs[0].outpatientStatus];
+                    rs[0].memberType = config.memberType[rs[0].memberType];
+                    result.currentQueue = rs[0];
+                    return hospitalDAO.findHistoryOutpatients(doctorId)
+                })
+            } else {
+                return hospitalDAO.findHistoryOutpatients(doctorId)
+            }
         }).then(function (histories) {
+            histories.length && histories.forEach(function (history) {
+                history.gender = config.gender[history.gender];
+                history.registrationType = config.registrationType[history.registrationType];
+                history.outPatientType = config.outPatientType[history.outPatientType];
+                history.outpatientStatus = config.outpatientStatus[history.outpatientStatus];
+            });
             result.historyQueue = histories;
             return hospitalDAO.findFinishedCountByDate(doctorId, today)
         }).then(function (finishCount) {
@@ -240,17 +306,7 @@ module.exports = {
         });
         return next();
     },
-    //finishOutpatient: function (req, res, next) {
-    //    var doctorId = req.user.id;
-    //    var today = moment().format('YYYY-MM-DD');
-    //    var rid = req.params.rid;
-    //    registrationDAO.updateRegistration({id: rid, finishDate: new Date()}).then(function () {
-    //        hospitalDAO.findWaitOutpatients(doctorId, today).then(function (items) {
-    //            res.send({ret: 0, data: (items.length ? items[0] : [])})
-    //        });
-    //    });
-    //    return next();
-    //},
+
     changeOutPatientStatus: function (req, res, next) {
         req.body.finishDate = new Date();
         registrationDAO.updateRegistration(req.body).then(function (result) {

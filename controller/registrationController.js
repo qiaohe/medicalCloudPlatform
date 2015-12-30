@@ -70,7 +70,7 @@ module.exports = {
         r.createDate = new Date();
         businessPeopleDAO.findShiftPlanByDoctorAndShiftPeriod(r.doctorId, r.registerDate, r.shiftPeriod).then(function (plans) {
             if (!plans.length || (plans[0].plannedQuantity < +plans[0].actualQuantity + 1)) {
-                return res.send({ret: 0, message: i18n.get('doctor.shift.plan.invalid')});
+                return res.send({ret: 1, message: i18n.get('doctor.shift.plan.invalid')});
             }
             return businessPeopleDAO.findPatientBasicInfoBy(r.patientMobile).then(function (basicInfos) {
                 return basicInfos.length ? basicInfos[0].id : businessPeopleDAO.insertPatientBasicInfo({
@@ -91,6 +91,7 @@ module.exports = {
                             patientBasicInfoId: r.patientBasicInfoId,
                             hospitalId: req.user.hospitalId,
                             memberType: 1,
+                            balance: 0.00,
                             memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                             createDate: new Date()
                         }).then(function (patient) {
@@ -164,6 +165,28 @@ module.exports = {
         registrationDAO.findRegistrationsById(rid).then(function (result) {
             res.send({ret: 0, data: result[0]});
         });
+        return next();
+    },
+    getRegistrationsOfDoctor: function (req, res, next) {
+        var doctorId = req.user.id;
+        req.query.doctorId = doctorId;
+        var pageIndex = req.query.pageIndex;
+        var pageSize = req.query.pageSize;
+        registrationDAO.findRegistrations(req.user.hospitalId, getConditions(req), {
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        }).then(function (registrations) {
+            registrations.rows && registrations.rows.forEach(function (registration) {
+                registration.registrationType = config.registrationType[registration.registrationType];
+                registration.gender = config.gender[registration.gender];
+                registration.memberType = config.memberType[registration.memberType];
+                registration.outPatientType = config.outPatientType[registration.outPatientType];
+                registration.status = config.registrationStatus[registration.status];
+            });
+            registrations.pageIndex = pageIndex;
+            return res.send({ret: 0, data: registrations});
+        });
+
         return next();
     }
 }
