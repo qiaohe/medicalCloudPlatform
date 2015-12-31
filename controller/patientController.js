@@ -90,7 +90,7 @@ module.exports = {
                 p.source = p.source && config.sourceType[p.source];
                 p.gender = p.gender && config.gender[p.gender];
                 p.consumptionLevel = p.consumptionLevel && config.consumptionLevel[p.consumptionLevel];
-            })
+            });
             patients.pageIndex = pageIndex;
             res.send({ret: 0, data: patients});
         });

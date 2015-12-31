@@ -76,6 +76,7 @@ module.exports = {
     },
 
     registration: {
+        insertRegistrationCancelHistory: 'insert RegistrationCancelHistory set ?',
         addShiftPlan: 'insert ShiftPlan set ?',
         findShiftPlans: 'select day, shiftPeriod, actualQuantity, plannedQuantity from ShiftPlan where hospitalId = ? and doctorId = ? order by day desc',
         findShiftPlansByDay: 'select shiftPeriod, actualQuantity, plannedQuantity from ShiftPlan where hospitalId = ? and doctorId = ? and day = ? order by shiftPeriod desc',
@@ -87,14 +88,14 @@ module.exports = {
         findRegistrationsByUid: 'select r.id, r.doctorId, doctorName, doctorHeadPic,registrationFee, departmentName,doctorJobTitle, hospitalName, patientName,concat(DATE_FORMAT(r.registerDate, \'%Y-%m-%d \') , s.`name`) as shiftPeriod, orderNo, r.status  from Registration r, ShiftPeriod s where r.shiftPeriod = s.id and paymentType =1 and patientBasicInfoId = ? and r.status <>4 order by r.id desc limit ?,?',
         findById: 'select * from Registration where id =?',
         updateRegistration: "update Registration set ? where id = ?",
-        findRegistrations: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.outpatientStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? order by r.id desc limit ?, ?',
+        findRegistrations: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.outpatientStatus from Registration r, Patient p where r.patientId =p.id and r.status <>4 and r.hospitalId = ? order by r.id desc limit ?, ?',
         findRegistrationsById: 'select * from Registration where id=?',
         findCurrentQueueByRegId: 'select r.id, doctorName, departmentName, patientName, registrationType, outPatientType, outpatientStatus, p.balance, p.memberType from Registration r LEFT JOIN Patient p on p.id =r.patientId where r.id =?',
-        findRegistrationsBy: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.outpatientStatus from Registration r, Patient p where r.patientId =p.id and r.hospitalId = ? and r.registerDate=? order by r.id desc limit ?, ?'
+        findRegistrationsBy: 'select SQL_CALC_FOUND_ROWS r.id, r.patientMobile,r.patientName,r.gender, p.balance, p.memberCardNo, p.memberType, r.doctorName, r.`comment`, r.registrationFee, r.registrationType, r.departmentName, r.registerDate, r.outPatientType, r.status, r.sequence, r.businessPeopleName, r.outpatientStatus from Registration r, Patient p where r.patientId =p.id and r.status <>4 and r.hospitalId = ? and r.registerDate=? order by r.id desc limit ?, ?'
     },
     patient: {
         updatePatient: 'update Patient set ? where id = ?',
-        findGroupCompanies: 'select SQL_CALC_FOUND_ROWS gc.*, e.`name` as recommenderName from GroupCompany gc left JOIN Employee e on e.id = gc.recommender where gc.hospitalId=? limit ?, ?',
+        findGroupCompanies: 'select SQL_CALC_FOUND_ROWS gc.*, e.`name` as recommenderName from GroupCompany gc left JOIN Employee e on e.id = gc.recommender where gc.hospitalId=? order by gc.id desc limit ?, ?',
         updateGroupCompany: 'update GroupCompany set ? where id = ?',
         deleteGroupCompany: 'delete from GroupCompany where id = ?',
         insertGroupCompany: 'insert GroupCompany set ?',

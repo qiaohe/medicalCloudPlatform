@@ -182,6 +182,12 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "post",
+        path: "/api/registrations/:rid/cancel",
+        handler: registrationController.cancelRegistrationByBackend,
+        secured: 'user'
+    },
+    {
         method: "get",
         path: "/api/dict/departments",
         handler: dictController.getDepartments,

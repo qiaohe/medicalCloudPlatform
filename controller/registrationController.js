@@ -129,14 +129,38 @@ module.exports = {
             }).then(function (result) {
                 res.send({ret: 0, dta: r})
             });
-        })
+        });
         return next();
     },
 
     changeRegistration: function (req, res, next) {
-        req.body.id = req.params.rid;
+        req.body.id = +req.params.rid;
         req.body.status = 3;
-        registrationDAO.updateRegistration(req.body).then(function () {
+        var oldRegistration = {};
+        businessPeopleDAO.findRegistrationById(req.body.id).then(function (rs) {
+            oldRegistration = rs[0];
+            if (oldRegistration.doctorId != req.body.doctorId || oldRegistration.registerDate != req.body.registerDate || oldRegistration.shiftPeriod != req.body.shiftPeriod) {
+                return businessPeopleDAO.updateShiftPlanDec(oldRegistration.doctorId, moment(oldRegistration.registerDate).format('YYYY-MM-DD'), oldRegistration.shiftPeriod).then(function () {
+                    return businessPeopleDAO.updateShiftPlan(req.body.doctorId, moment(req.body.registerDate).format('YYYY-MM-DD'), req.body.shiftPeriod);
+                })
+            }
+        }).then(function () {
+            if (oldRegistration.doctorId != req.body.doctorId) {
+                return hospitalDAO.findDoctorById(req.body.doctorId).then(function (docotors) {
+                    var doctor = docotors[0];
+                    req.body.doctorName = doctor.name;
+                    req.body.departmentId = doctor.departmentId;
+                    req.body.departmentName = doctor.departmentName;
+                    req.body.registrationFee = doctor.registrationFee;
+                    req.body.doctorJobTitle = doctor.jobTitle;
+                    req.body.doctorJobTitleId = doctor.jobTitleId;
+                    req.body.doctorHeadPic = doctor.headPic;
+                    return registrationDAO.updateRegistration(req.body);
+                })
+            } else {
+                return registrationDAO.updateRegistration(req.body);
+            }
+        }).then(function () {
             return res.send({ret: 0, message: i18n.get('registration.update.success')});
         });
         return next();
@@ -147,7 +171,7 @@ module.exports = {
         var rid = req.params.rid;
         businessPeopleDAO.findRegistrationById(rid).then(function (rs) {
             registration = rs[0];
-            return registrationDAO.updateShiftPlanDec(registration.doctorId, moment(registration.registerDate).format('YYYY-MM-DD'), registration.shiftPeriod)
+            return businessPeopleDAO.updateShiftPlanDec(registration.doctorId, moment(registration.registerDate).format('YYYY-MM-DD'), registration.shiftPeriod)
         }).then(function () {
             return registrationDAO.updateRegistration({
                 id: req.params.rid,
@@ -160,6 +184,34 @@ module.exports = {
         });
         return next();
     },
+
+    cancelRegistrationByBackend: function (req, res, next) {
+        var registration = {};
+        var rid = req.params.rid;
+        businessPeopleDAO.findRegistrationById(rid).then(function (rs) {
+            registration = rs[0];
+            return businessPeopleDAO.updateShiftPlanDec(registration.doctorId, moment(registration.registerDate).format('YYYY-MM-DD'), registration.shiftPeriod)
+        }).then(function () {
+            return registrationDAO.updateRegistration({
+                id: req.params.rid,
+                status: 4,
+                updateDate: new Date(),
+                outPatientStatus: 6
+            })
+        }).then(function () {
+            return registrationDAO.insertCancelHistory({
+                creator: req.user.id,
+                createDate: new Date(),
+                reason: req.body.reason,
+                registrationId: rid
+            })
+        }).then(function () {
+            res.send({ret: 0, message: i18n.get('preRegistration.cancel.success')});
+        });
+        return next();
+
+    },
+
     getRegistration: function (req, res, next) {
         var rid = req.params.rid;
         registrationDAO.findRegistrationsById(rid).then(function (result) {

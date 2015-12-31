@@ -24,8 +24,8 @@ server.use(restify.bodyParser());
 server.use(logger());
 server.use(auth());
 router.route(server);
-process.on('uncaughtException', function (err) {
-    console.log(err);
+server.on("uncaughtException", function (req, res, route, err) {
+    res.send(err);
 });
 server.listen(config.server.port, config.server.host, function () {
     console.log('%s listening at %s', server.name, server.url);

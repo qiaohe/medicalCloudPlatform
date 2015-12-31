@@ -4,7 +4,7 @@ var sqlMapping = require('./sqlMapping');
 module.exports = {
     findGroupCompanies: function (hospitalId, page, conditions) {
         var sql = sqlMapping.patient.findGroupCompanies;
-        sql = !conditions.length ? sql : 'select SQL_CALC_FOUND_ROWS gc.*, e.`name` as recommenderName from GroupCompany gc left JOIN Employee e on e.id = gc.recommender where gc.hospitalId=? and ' + conditions.join(' and ') + ' limit ?, ?';
+        sql = !conditions.length ? sql : 'select SQL_CALC_FOUND_ROWS gc.*, e.`name` as recommenderName from GroupCompany gc left JOIN Employee e on e.id = gc.recommender where gc.hospitalId=? and ' + conditions.join(' and ') + ' order by gc.id desc limit ?, ?';
         return db.queryWithCount(sql, [+hospitalId, +page.from, +page.size]);
     },
     insertGroupCompany: function (groupCompany) {
