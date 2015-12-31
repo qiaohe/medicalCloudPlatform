@@ -3,6 +3,7 @@ var config = require('../config');
 var _ = require('lodash');
 var hospitalDAO = require('../dao/hospitalDAO');
 var businessPeopleDAO = require('../dao/businessPeopleDAO');
+var i18n = require('../i18n/localeMessage');
 module.exports = {
     getDepartments: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
@@ -68,11 +69,53 @@ module.exports = {
         });
         return next();
     },
+    addRole: function (req, res, next) {
+        req.body.hospitalId = req.user.hospitalId;
+        hospitalDAO.insertRole(req.body).then(function (result) {
+            req.body.id = result.insertId;
+            res.send(req.body);
+        });
+        return next();
+    },
+
+    removeRole: function (req, res, next) {
+        hospitalDAO.deleteRole(req.params.id).then(function () {
+            res.send({ret: 0, message: i18n.get('role.remove.success')});
+        });
+        return next();
+    },
+
     getJobTitlesByRole: function (req, res, next) {
         hospitalDAO.findJobTitleByRole(req.user.hospitalId, req.params.roleId).then(function (jobTitles) {
             res.send({ret: 0, data: jobTitles});
         });
         return next();
+    },
+    addJobTitlesByRole: function (req, res, next) {
+        req.body.hospitalId = req.user.hospitalId;
+        req.body.role = req.params.roleId;
+        hospitalDAO.insertJobTitle(req.body).then(function (result) {
+            req.body.id = result.insertId;
+            res.send(req.body);
+        });
+        return next();
+    },
+    removeJobTitlesByRole: function (req, res, next) {
+        hospitalDAO.deleteJobTitle(req.params.roleId, req.params.jobTitleId).then(function () {
+            res.send({ret: 0, message: i18n.get('jobTitle.remove.success')});
+        });
+        return next();
+    },
+    editJobTitlesByRole: function (req, res, next) {
+        hospitalDAO.updateJobTitle(req.body).then(function () {
+            res.send({ret: 0, message: i18n.get('update.jobTitle.success')});
+        });
+        return next();
+    },
+    editRole: function (req, res, next) {
+        hospitalDAO.updateRole(req.body).then(function () {
+            res.send({ret: 0, message: i18n.get('update.role.success')});
+        });
+        return next();
     }
-
 }

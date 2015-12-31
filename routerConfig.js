@@ -350,9 +350,45 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "post",
+        path: "/api/roles",
+        handler: dictController.addRole,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/roles",
+        handler: dictController.editRole,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/roles/:id",
+        handler: dictController.removeRole,
+        secured: 'user'
+    },
+    {
         method: "get",
         path: "/api/roles/:roleId/jobTitles",
         handler: dictController.getJobTitlesByRole,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/roles/:roleId/jobTitles",
+        handler: dictController.addJobTitlesByRole,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/roles/:roleId/jobTitles",
+        handler: dictController.editJobTitlesByRole,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/roles/:roleId/jobTitles/:id",
+        handler: dictController.removeJobTitlesByRole,
         secured: 'user'
     },
     {

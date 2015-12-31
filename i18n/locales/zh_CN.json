@@ -45,6 +45,9 @@
   "employee.update.success": "员工信息更新成功",
   "outpatientStatus.change.success": "门诊状态修改成功",
   "prePaid.add.success": "充值交易成功",
-  "performance.edit.success":"业务人员业绩修改成功"
-
+  "performance.edit.success": "业务人员业绩修改成功",
+  "role.remove.success": "角色删除成功",
+  "jobTitle.remove.success": "岗位删除成功",
+  "update.jobTitle.success":"修改岗位成功",
+  "update.role.success":"修改角色成功"
 }

@@ -82,7 +82,7 @@ module.exports = {
         return db.query(sqlMapping.businessPeople.findPerformances + (conditions.length ? ' and ' + conditions : '') + '  order by name, yearMonth', hospitalId);
     },
 
-    findPerformancesBy: function(businessPeopleId) {
+    findPerformancesBy: function (businessPeopleId) {
         return db.query(sqlMapping.businessPeople.findPerformancesBy, businessPeopleId);
 
     },
@@ -103,5 +103,23 @@ module.exports = {
 
     findHistoryOutpatients: function (doctorId) {
         return db.query(sqlMapping.doctor.findHistoryOutpatients, doctorId)
-    }
+    },
+    insertRole: function (role) {
+        return db.query(sqlMapping.employee.insertRole, role);
+    },
+    deleteRole: function (id) {
+        return db.query(sqlMapping.employee.deleteRole, id);
+    },
+    insertJobTitle: function (jobTitle) {
+        return db.query(sqlMapping.employee.insertJobTitle, jobTitle);
+    },
+    deleteJobTitle: function (roleId, jobTitleId) {
+        return db.query(sqlMapping.employee.deleteJobTitle, [roleId, jobTitleId]);
+    },
+    updateJobTitle: function(jobTitle) {
+        return db.query(sqlMapping.employee.updateJobTitle, [jobTitle, jobTitle.id]);
+    },
+    updateRole: function(role) {
+        return db.query(sqlMapping.employee.updateRole, [role, role.id]);
+    },
 }
