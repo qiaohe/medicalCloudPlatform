@@ -4,6 +4,7 @@ var redis = require('../common/redisClient');
 var i18n = require('../i18n/localeMessage');
 var hospitalDAO = require('../dao/hospitalDAO');
 var registrationDAO = require('../dao/registrationDAO');
+var notificationDAO = require('../dao/notificationDAO');
 var _ = require('lodash');
 var moment = require('moment');
 var Promise = require("bluebird");
@@ -150,15 +151,44 @@ module.exports = {
                 day: day
             };
             shiftPeriods.forEach(function (period) {
-                shiftPlan.plannedQuantity = period.quantity;
-                shiftPlan.shiftPeriod = period.shiftPeriod;
-                shiftPlans.push(shiftPlan);
+                var p = _.clone(shiftPlan, true);
+                p.plannedQuantity = period.quantity;
+                p.shiftPeriod = period.shiftPeriod;
+                shiftPlans.push(p);
             });
         });
         Promise.map(shiftPlans, function (shitPlan) {
             return hospitalDAO.addShiftPlan(shitPlan);
         }).then(function () {
             res.send({ret: 0, message: i18n.get('shiftPlan.add.success')});
+        });
+        return next();
+    },
+    editShitPlans: function (req, res, next) {
+        var hospitalId = req.user.hospitalId;
+        var days = req.body.days;
+        var shiftPeriods = req.body.shiftPeriods;
+        var shiftPlans = [];
+        days && days.forEach(function (day) {
+            var shiftPlan = {
+                createDate: new Date(),
+                creator: req.user.id,
+                hospitalId: req.user.hospitalId,
+                doctorId: req.params.doctorId,
+                actualQuantity: 0,
+                day: day
+            };
+            shiftPeriods.forEach(function (period) {
+                var p = _.clone(shiftPlan, true);
+                p.plannedQuantity = period.quantity;
+                p.shiftPeriod = period.shiftPeriod;
+                shiftPlans.push(p);
+            });
+        });
+        Promise.map(shiftPlans, function (shitPlan) {
+            return hospitalDAO.updateShiftPlan(shitPlan);
+        }).then(function () {
+            res.send({ret: 0, message: i18n.get('shiftPlan.edit.success')});
         });
         return next();
     },
@@ -311,6 +341,18 @@ module.exports = {
         req.body.finishDate = new Date();
         registrationDAO.updateRegistration(req.body).then(function (result) {
             res.send({ret: 0, message: i18n.get('outpatientStatus.change.success')});
+        });
+        return next();
+    },
+
+    getNotifications: function (req, res, next) {
+        var pageIndex = +req.query.pageIndex;
+        var pageSize = +req.query.pageSize;
+        notificationDAO.findAll({
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        }).then(function (notifications) {
+            res.send({ret: 0, data: notifications});
         });
         return next();
     }

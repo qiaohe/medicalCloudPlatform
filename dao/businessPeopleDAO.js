@@ -66,10 +66,19 @@ module.exports = {
         return db.query(sqlMapping.businessPeople.findRegistrationsByUid, [uid, page.from, page.size]);
     },
     findBusinessPeople: function (hospitalId) {
-        return db.query(sqlMapping.employee.findByRole, 3);
+        return db.query(sqlMapping.employee.findByRole, 4);
     },
     findShiftPeriods: function (hospitalId) {
         return db.query(sqlMapping.businessPeople.findShiftPeriods, hospitalId);
+    },
+    addShiftPeriod: function (period) {
+        return db.query(sqlMapping.businessPeople.addShiftPeriod, period);
+    },
+    deleteShiftPeriod: function (id) {
+        return db.query(sqlMapping.businessPeople.deleteShiftPeriod, id);
+    },
+    updateShiftPeriod: function (name, periodId) {
+        return db.query(sqlMapping.businessPeople.updateShiftPeriod, [name, periodId]);
     },
     transferContact: function (toBusinessPeopleId, contacts) {
         return db.query(sqlMapping.businessPeople.transferContact + '(' + contacts + ')', [toBusinessPeopleId, contacts]);

@@ -68,6 +68,9 @@ module.exports = {
     addShiftPlan: function (shiftPlan) {
         return db.query(sqlMapping.registration.addShiftPlan, shiftPlan);
     },
+    updateShiftPlan: function (shiftPlan) {
+        return db.query(sqlMapping.registration.updateShiftPlanBy, [shiftPlan.plannedQuantity, shiftPlan.doctorId, shiftPlan.day, shiftPlan.shiftPeriod]);
+    },
     findShiftPlansBy: function (hospitalId, doctorId) {
         return db.query(sqlMapping.registration.findShiftPlans, [hospitalId, doctorId]);
     },
@@ -91,7 +94,7 @@ module.exports = {
     },
 
     updatePerformance: function (performance) {
-        return db.query(sqlMapping.businessPeople.updatePerformance, [performance.plannedCount, performance.businessPeopleId, performance.yearMonth]);
+        return db.query(sqlMapping.businessPeople.updatePerformance, [+performance.plannedCount, +performance.businessPeopleId, performance.yearMonth]);
     },
 
     findWaitOutpatients: function (doctorId, registerDate) {
@@ -116,10 +119,10 @@ module.exports = {
     deleteJobTitle: function (roleId, jobTitleId) {
         return db.query(sqlMapping.employee.deleteJobTitle, [roleId, jobTitleId]);
     },
-    updateJobTitle: function(jobTitle) {
+    updateJobTitle: function (jobTitle) {
         return db.query(sqlMapping.employee.updateJobTitle, [jobTitle, jobTitle.id]);
     },
-    updateRole: function(role) {
+    updateRole: function (role) {
         return db.query(sqlMapping.employee.updateRole, [role, role.id]);
     },
 }

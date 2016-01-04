@@ -218,6 +218,24 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "post",
+        path: "/api/dict/shiftPeriods",
+        handler: dictController.addShiftPeriod,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/dict/shiftPeriods/:id",
+        handler: dictController.removeShiftPeriod,
+        secured: 'user'
+    },
+    {
+        method: "put",
+        path: "/api/dict/shiftPeriods",
+        handler: dictController.editShiftPeriod,
+        secured: 'user'
+    },
+    {
         method: "get",
         path: "/api/doctors/:doctorId/registrationFee",
         handler: dictController.getRegistrationFee,
@@ -398,6 +416,12 @@ module.exports = [
         secured: 'user'
     },
     {
+        method: "put",
+        path: "/api/doctors/:doctorId/shiftPlans",
+        handler: hospitalController.editShitPlans,
+        secured: 'user'
+    },
+    {
         method: "get",
         path: "/api/pc/doctors/:doctorId/shiftPlans",
         handler: hospitalController.getShiftPlansOfDoctor,
@@ -443,6 +467,12 @@ module.exports = [
         method: "get",
         path: "/api/myRegistrations",
         handler: registrationController.getRegistrationsOfDoctor,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/notifications",
+        handler: hospitalController.getNotifications,
         secured: 'user'
     }
 ];

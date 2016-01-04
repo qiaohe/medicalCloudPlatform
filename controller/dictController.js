@@ -35,6 +35,31 @@ module.exports = {
         });
         return next();
     },
+
+    addShiftPeriod: function (req, res, next) {
+        var period = req.body;
+        period.hospitalId = req.user.hospitalId;
+        period.enabled = true;
+        businessPeopleDAO.addShiftPeriod(period).then(function (result) {
+            res.send({ret: 0, data: {id: result.insertId, name: period.name}});
+        });
+        return next();
+    },
+
+    removeShiftPeriod: function (req, res, next) {
+        businessPeopleDAO.deleteShiftPeriod(req.params.id).then(function (result) {
+            res.send({ret: 0, message: i18n.get('shiftPeriod.remove.success')});
+        });
+        return next();
+    },
+
+    editShiftPeriod: function (req, res, next) {
+        businessPeopleDAO.updateShiftPeriod(req.body.name, req.body.id).then(function (result) {
+            res.send({ret: 0, message: i18n.get('shiftPeriod.update.success')});
+        });
+        return next();
+    },
+
     getRegistrationFee: function (req, res, next) {
         hospitalDAO.findDoctorById(req.params.doctorId).then(function (doctors) {
             return res.send({ret: 0, data: {id: doctors[0].id, registrationFee: doctors[0].registrationFee}});
@@ -101,7 +126,7 @@ module.exports = {
         return next();
     },
     removeJobTitlesByRole: function (req, res, next) {
-        hospitalDAO.deleteJobTitle(req.params.roleId, req.params.jobTitleId).then(function () {
+        hospitalDAO.deleteJobTitle(req.params.roleId, req.params.id).then(function () {
             res.send({ret: 0, message: i18n.get('jobTitle.remove.success')});
         });
         return next();

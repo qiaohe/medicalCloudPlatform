@@ -50,5 +50,8 @@
   "role.remove.success": "角色删除成功",
   "jobTitle.remove.success": "岗位删除成功",
   "update.jobTitle.success": "修改岗位成功",
-  "update.role.success": "修改角色成功"
+  "update.role.success": "修改角色成功",
+  "shiftPlan.edit.success": "排班信息修改成功",
+  "shiftPeriod.update.success":"排班时段修改成功",
+  "shiftPeriod.remove.success":"排班时段添加成功"
 }

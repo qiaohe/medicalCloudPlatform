@@ -41,6 +41,9 @@ module.exports = {
         findContactsBy: 'select id, mobile, name, createDate, inviteTimes, source, inviteResult from InvitationContact where businessPeopleId=?',
         findContactsByPagable: 'select SQL_CALC_FOUND_ROWS ic.id, ic.mobile, ic.name, ic.createDate, ic.inviteTimes, ic.source, ic.inviteResult,gc.`name` as groupName from InvitationContact ic left join GroupCompany gc on gc.id = ic.groupId where ic.businessPeopleId=? limit ?, ?',
         findShiftPeriods: 'select id, name from ShiftPeriod where hospitalId = ?',
+        addShiftPeriod: 'insert ShiftPeriod set ?',
+        deleteShiftPeriod: 'delete from ShiftPeriod where id = ?',
+        updateShiftPeriod: 'update ShiftPeriod set name=? where id=?',
         transferContact: 'update InvitationContact set businessPeopleId=? where id in ',
         addTransferHistory: 'insert ContactTransferHistory set ?',
         insertPerformance: 'insert Performance set ?',
@@ -84,6 +87,7 @@ module.exports = {
     registration: {
         insertRegistrationCancelHistory: 'insert RegistrationCancelHistory set ?',
         addShiftPlan: 'insert ShiftPlan set ?',
+        updateShiftPlanBy: 'update ShiftPlan set plannedQuantity=? where doctorId=? and day=? and shiftPeriod=?',
         findShiftPlans: 'select day, shiftPeriod, actualQuantity, plannedQuantity from ShiftPlan where hospitalId = ? and doctorId = ? order by day desc',
         findShiftPlansByDay: 'select shiftPeriod, actualQuantity, plannedQuantity from ShiftPlan where hospitalId = ? and doctorId = ? and day = ? order by shiftPeriod desc',
         findShiftPlansByDayWithName: 'select shiftPeriod,s2.`name` as shiftPeriodName,plannedQuantity - actualQuantity as restQuantity from ShiftPlan s1, ShiftPeriod s2 where s1.shiftPeriod = s2.id and s1.hospitalId = ? and s1.doctorId = ? and s1.day = ? order by s1.shiftPeriod desc',
@@ -118,5 +122,8 @@ module.exports = {
     city: {
         findProvinces: 'select DISTINCT province from city',
         findCities: 'select cityId, city from city where province=?'
+    },
+    notification: {
+        findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?'
     }
 }
