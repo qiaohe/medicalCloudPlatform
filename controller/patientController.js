@@ -30,7 +30,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, conditions).then(function (companies) {
-            if (!companies.rows.length) return res.send({ret: 0, data: []});
+            if (!companies.rows.length) return res.send({ret: 0, data: {rows: []}});
             companies.rows.forEach(function (company) {
                 company.source = config.sourceType[company.source];
                 company.cashbackType = config.cashbackType[company.cashbackType];
@@ -77,14 +77,14 @@ module.exports = {
         return next();
     },
     getPatients: function (req, res, next) {
-        var hospitalId = req.user.id;
+        var hospitalId = req.user.hospitalId;
         var pageIndex = +req.query.pageIndex;
         var pageSize = +req.query.pageSize;
         patientDAO.findPatients(hospitalId, {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, getConditions(req)).then(function (patients) {
-            if (!patients.rows.length) return res.send({ret: 0, data: []});
+            if (!patients.rows.length) return  res.send({ret: 0, data: {rows: []}});
             patients.rows.forEach(function (p) {
                 p.memberType = p.memberType && config.memberType[p.memberType];
                 p.source = p.source && config.sourceType[p.source];

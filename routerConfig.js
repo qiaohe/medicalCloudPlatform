@@ -25,6 +25,12 @@ module.exports = [
         handler: thirdPartyController.getQiniuToken
     },
     {
+        method: "get",
+        path: "/api/me",
+        handler: authController.getMemberInfo,
+        secured: 'user'
+    },
+    {
         method: 'post',
         path: '/api/employees',
         handler: employeeController.addEmployee,
@@ -443,6 +449,12 @@ module.exports = [
         method: "get",
         path: "/api/businessPeoples/:id/performances",
         handler: hospitalController.getPerformancesBy,
+        secured: 'user'
+    },
+    {
+        method: "del",
+        path: "/api/businessPeoples/:id/performances",
+        handler: hospitalController.removePerformancesBy,
         secured: 'user'
     },
     {

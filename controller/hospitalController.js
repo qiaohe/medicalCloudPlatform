@@ -255,19 +255,24 @@ module.exports = {
         });
         return next();
     },
+    removePerformancesBy: function (req, res, next) {
+        var businessPeopleId = req.params.id;
+        hospitalDAO.deletePerformancesBy(businessPeopleId).then(function (result) {
+            res.send({ret:0, message: i18n.get('performance.remove.success')});
+        });
+        return next();
+    },
 
     addPerformances: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
         var ps = [];
-        req.body.data && req.body.data.forEach(function (item) {
-            item.performances && item.performances.forEach(function (p) {
-                ps.push({
-                    businessPeopleId: item.businessPeopleId,
-                    plannedCount: p.plannedCount,
-                    actualCount: 0,
-                    yearMonth: p.yearMonth
-                });
-            })
+        req.body.data && req.body.data.forEach(function (p) {
+            ps.push({
+                businessPeopleId: +req.body.businessPeopleId,
+                plannedCount: +p.plannedCount,
+                actualCount: 0,
+                yearMonth: p.yearMonth
+            });
         });
         Promise.map(ps, function (performance) {
             return hospitalDAO.addPerformance(performance);

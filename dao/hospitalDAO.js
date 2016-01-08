@@ -125,4 +125,7 @@ module.exports = {
     updateRole: function (role) {
         return db.query(sqlMapping.employee.updateRole, [role, role.id]);
     },
+    deletePerformancesBy: function(businessPeopleId) {
+        return db.query(sqlMapping.businessPeople.deletePerformancesBy, businessPeopleId);
+    }
 }

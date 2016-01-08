@@ -121,6 +121,8 @@ module.exports = {
                     r.outPatientType = 0;
                     r.outpatientStatus = 5;
                     r.registrationType = 2;
+                    if (!r.businessPeopleId) delete r.businessPeopleId;
+                    delete r.reason;
                     return businessPeopleDAO.insertRegistration(r)
                 });
             }).then(function (result) {

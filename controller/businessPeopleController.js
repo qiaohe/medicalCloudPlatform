@@ -29,7 +29,7 @@ module.exports = {
     getContacts: function (req, res, next) {
         var uid = req.user.id;
         businessPeopleDAO.findContactsBy(uid, {from: req.query.from, size: req.query.size}).then(function (contacts) {
-            if (!contacts.length) return res.send({ret: 0, data: null});
+            if (!contacts.length) return res.send({ret: 0, data: []});
             contacts.forEach(function (contact) {
                 contact.source = config.sourceType[contact.source];
             });
@@ -44,7 +44,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }).then(function (contacts) {
-            if (!contacts.rows.length) return res.send({ret: 0, data: null});
+            if (!contacts.rows.length) return res.send({ret: 0, data: {rows: []}});
             contacts.rows.forEach(function (contact) {
                 contact.source = config.sourceType[contact.source];
             });
@@ -102,7 +102,7 @@ module.exports = {
             var contact = contacts[0];
             registration = _.assign(registration, {
                 patientName: contact.name, patientMobile: contact.mobile,
-                createDate: new Date(), patientBasicInfoId: req.user.id
+                createDate: new Date()
             });
             return hospitalDAO.findDoctorById(registration.doctorId);
         }).then(function (doctors) {
@@ -128,7 +128,7 @@ module.exports = {
                     registration.sequence = seq;
                     registration.outPatientType = 0;
                     registration.outpatientStatus = 5;
-                    return businessPeopleDAO.insertRegistration(registration);
+                    return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
                 });
             }
             businessPeopleDAO.insertPatientBasicInfo({
@@ -140,15 +140,11 @@ module.exports = {
                     registration.sequence = seq;
                     registration.outPatientType = 0;
                     registration.outpatientStatus = 5;
-                    return businessPeopleDAO.insertRegistration(registration)
+                    return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
                 });
             });
         }).then(function (result) {
-            return businessPeopleDAO.updateShiftPlan(registration.doctorId, registration.registerDate, registration.shiftPeriod);
-        }).then(function () {
-            return businessPeopleDAO.findPatientByBasicInfoId(req.user.id);
-        }).then(function (result) {
-            if (!result)
+            if (!result.length) {
                 return redis.incrAsync('member.no.incr').then(function (memberNo) {
                     return businessPeopleDAO.insertPatient({
                         patientBasicInfoId: registration.patientBasicInfoId,
@@ -157,9 +153,16 @@ module.exports = {
                         balance: 0.00,
                         memberCardNo: req.user.hospitalId.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                         createDate: new Date()
+                    }).then(function (patient) {
+                        registration.patientId = patient.insertId;
                     });
                 });
-
+            } else {
+                registration.patientId = result[0].id;
+            }
+            return businessPeopleDAO.insertRegistration(registration);
+        }).then(function () {
+            return businessPeopleDAO.updateShiftPlan(registration.doctorId, registration.registerDate, registration.shiftPeriod);
         }).then(function () {
             return businessPeopleDAO.findShiftPeriodById(req.user.hospitalId, registration.shiftPeriod);
         }).then(function (result) {
