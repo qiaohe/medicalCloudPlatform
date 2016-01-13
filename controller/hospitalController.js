@@ -200,10 +200,22 @@ module.exports = {
         if (req.query.department) conditions.push('d.id=' + req.query.department);
         if (req.query.start) conditions.push('p.yearMonth>=\'' + req.query.start + '\'');
         if (req.query.end) conditions.push('p.yearMonth<=\'' + req.query.end + '\'');
-        hospitalDAO.findPerformances(hospitalId, conditions.join(' and ')).then(function (performances) {
-            var data = [];
+        var pageIndex = +req.query.pageIndex;
+        var pageSize = +req.query.pageSize;
+        var data = {};
+        hospitalDAO.findBusinessPeopleWithPage(hospitalId, {
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        },conditions.length && conditions.join(' and ')).then(function (businessPeoples) {
+            data.count = businessPeoples.count;
+            data.pageIndex = pageIndex;
+            data.performances = [];
+            if (!businessPeoples.rows.length) return res.send({ret: 0, data: data});
+            var idList = businessPeoples.rows.length && _.pluck(businessPeoples.rows, 'businessPeopleId');
+            return hospitalDAO.findPerformances(hospitalId, conditions.join(' and '), idList)
+        }).then(function (performances) {
             performances.length && performances.forEach(function (p) {
-                var item = _.findWhere(data, {
+                var item = _.findWhere(data.performances, {
                     businessPeopleId: p.businessPeopleId,
                     name: p.name
                 });
@@ -213,7 +225,7 @@ module.exports = {
                         name: p.name,
                         performances: []
                     };
-                    data.push(item);
+                    data.performances.push(item);
                 }
                 item.performances.push({
                     actualCount: p.actualCount,
@@ -257,8 +269,9 @@ module.exports = {
     },
     removePerformancesBy: function (req, res, next) {
         var businessPeopleId = req.params.id;
-        hospitalDAO.deletePerformancesBy(businessPeopleId).then(function (result) {
-            res.send({ret:0, message: i18n.get('performance.remove.success')});
+        var year = req.params.year;
+        hospitalDAO.deletePerformancesBy(businessPeopleId, year).then(function (result) {
+            res.send({ret: 0, message: i18n.get('performance.remove.success')});
         });
         return next();
     },

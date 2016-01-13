@@ -28,9 +28,27 @@ module.exports = {
         return next();
     },
 
+    getNoPlanBusinessPeople: function(req, res, next) {
+        var year = req.params.year;
+        var hospitalId = req.user.hospitalId;
+        businessPeopleDAO.findNoPlanBusinessPeople(hospitalId, year).then(function (result) {
+            res.send({ret: 0, data: result});
+        });
+        return next();
+    },
     getShiftPeriods: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
         businessPeopleDAO.findShiftPeriods(hospitalId).then(function (result) {
+            res.send({ret: 0, data: result});
+        });
+        return next();
+    },
+
+    getAvailablePeriods: function(req, res, next) {
+        var hospitalId = req.user.hospitalId;
+        var doctorId = req.params.doctorId;
+        var day = req.query.day;
+        businessPeopleDAO.findAvailableShiftPeriods(hospitalId, doctorId, day).then(function (result) {
             res.send({ret: 0, data: result});
         });
         return next();

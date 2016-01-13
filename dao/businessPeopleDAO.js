@@ -11,8 +11,10 @@ module.exports = {
     findContactsBy: function (businessPeopleId) {
         return db.query(sqlMapping.businessPeople.findContactsBy, businessPeopleId);
     },
-    findContactsByPagable: function (businessPeopleId, page) {
-        return db.queryWithCount(sqlMapping.businessPeople.findContactsByPagable, [businessPeopleId, page.from, page.size]);
+    findContactsByPagable: function (businessPeopleId, page, conditions) {
+        var sql = sqlMapping.businessPeople.findContactsByPagable;
+        sql = !conditions.length ? sql : 'select SQL_CALC_FOUND_ROWS ic.id, ic.mobile, ic.name, ic.createDate, ic.inviteTimes, ic.source, ic.inviteResult,gc.`name` as groupName from InvitationContact ic left join GroupCompany gc on gc.id = ic.groupId where ic.businessPeopleId=? and ' + conditions.join(' and ') + ' limit ?, ?';
+        return db.queryWithCount(sql, [businessPeopleId, page.from, page.size]);
     },
 
     insertContact: function (contact) {
@@ -68,8 +70,14 @@ module.exports = {
     findBusinessPeople: function (hospitalId) {
         return db.query(sqlMapping.employee.findByRole, 4);
     },
+    findNoPlanBusinessPeople: function (hospitalId, year) {
+        return db.query(sqlMapping.employee.findNoPlanBusinessPeople, [hospitalId, year]);
+    },
     findShiftPeriods: function (hospitalId) {
         return db.query(sqlMapping.businessPeople.findShiftPeriods, hospitalId);
+    },
+    findAvailableShiftPeriods: function (hospitalId, doctorId, day) {
+        return db.query(sqlMapping.businessPeople.findAvailableShiftPeriods, [hospitalId, doctorId, day]);
     },
     addShiftPeriod: function (period) {
         return db.query(sqlMapping.businessPeople.addShiftPeriod, period);

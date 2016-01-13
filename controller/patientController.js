@@ -13,7 +13,7 @@ function getConditions(req) {
     if (req.query.source) conditions.push('p.source=' + req.query.source);
     if (req.query.groupId) conditions.push('p.groupId=' + req.query.groupId);
     if (req.query.consumptionLevel) conditions.push('p.consumptionLevel=' + req.query.consumptionLevel);
-    if (req.query.recommender) conditions.push('r.recommender=' + req.query.recommender);
+    if (req.query.recommender) conditions.push('p.recommender=' + req.query.recommender);
     if (req.query.name) conditions.push('pb.name like \'%' + req.query.name + '%\'');
     if (req.query.mobile) conditions.push('pb.mobile like \'%' + req.query.mobile + '%\'');
     return conditions;
@@ -45,8 +45,8 @@ module.exports = {
         patientDAO.findGroupCompanyById(groupId).then(function (companies) {
             if (!companies.length) res.send({ret: 0, data: []});
             var company = companies[0];
-            company.source = config.sourceType[company.source];
-            company.cashbackType = config.cashbackType[company.cashbackType];
+            company.sourceName = config.sourceType[company.source];
+            company.cashbackTypeName = config.cashbackType[company.cashbackType];
             res.send({ret: 0, data: company});
         });
         return next();
@@ -64,6 +64,7 @@ module.exports = {
     updateGroupCompany: function (req, res, next) {
         var groupCompany = req.body;
         groupCompany.hospitalId = req.user.hospitalId;
+        groupCompany = _.omit(groupCompany, ['recommenderName', 'sourceName', 'cashbackTypeName']);
         patientDAO.updateGroupCompany(groupCompany).then(function (result) {
             res.send({ret: 0, message: i18n.get('groupCompany.update.success')});
         });
@@ -86,10 +87,10 @@ module.exports = {
         }, getConditions(req)).then(function (patients) {
             if (!patients.rows.length) return  res.send({ret: 0, data: {rows: []}});
             patients.rows.forEach(function (p) {
-                p.memberType = p.memberType && config.memberType[p.memberType];
-                p.source = p.source && config.sourceType[p.source];
-                p.gender = p.gender && config.gender[p.gender];
-                p.consumptionLevel = p.consumptionLevel && config.consumptionLevel[p.consumptionLevel];
+                p.memberType =  config.memberType[p.memberType];
+                p.source =  config.sourceType[p.source];
+                p.gender = config.gender[p.gender];
+                p.consumptionLevel = config.consumptionLevel[p.consumptionLevel];
             });
             patients.pageIndex = pageIndex;
             res.send({ret: 0, data: patients});

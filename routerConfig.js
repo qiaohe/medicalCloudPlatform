@@ -213,6 +213,13 @@ module.exports = [
     },
     {
         method: "get",
+        path: "/api/dict/years/:year/noPlan/businessPeoples",
+        handler: dictController.getNoPlanBusinessPeople,
+        secured: 'user'
+    },
+
+    {
+        method: "get",
         path: "/api/businessPeoples/:id/contacts",
         handler: businessPeopleController.getContactsByBusinessPeopleId,
         secured: 'user'
@@ -221,6 +228,12 @@ module.exports = [
         method: "get",
         path: "/api/dict/shiftPeriods",
         handler: dictController.getShiftPeriods,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/doctors/:doctorId/availableShiftPeriods",
+        handler: dictController.getAvailablePeriods,
         secured: 'user'
     },
     {
@@ -453,7 +466,7 @@ module.exports = [
     },
     {
         method: "del",
-        path: "/api/businessPeoples/:id/performances",
+        path: "/api/businessPeoples/:id/years/:year/performances",
         handler: hospitalController.removePerformancesBy,
         secured: 'user'
     },

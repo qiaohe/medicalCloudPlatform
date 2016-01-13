@@ -33,6 +33,16 @@ module.exports = {
         masterSecret: "e77461a38257ec2049387a04",
         appKey: "0fce1f73a7ac164ca3e09dc7"
     },
+    sms: {
+        providerUrl: 'http://115.29.44.189:8080/sms/smsInterface.do',
+        template: '【患者通】您的邀请码是:code,赶快去注册使用吧.',
+        expireTime: 600,
+        option: {
+            username: 'tuning',
+            password: '111111'
+        }
+    },
+
     registrationType: ["线上预约", "线下预约", "现场挂号", "复诊预约", "转诊挂号", "现场加号", "线上加号", "销售代约", "销售加号"],
     registrationStatus: ["预约成功", "预约未支付", "预约失败", "预约变更", "预约取消"],
     transactionType: ['挂号消费', '充值交易'],

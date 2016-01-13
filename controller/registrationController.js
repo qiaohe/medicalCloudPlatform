@@ -11,15 +11,16 @@ var redis = require('../common/redisClient');
 var md5 = require('md5');
 function getConditions(req) {
     var conditions = [];
-    if (req.query.memberType) conditions.push('r.memberType=' + req.query.memberType);
+    if (req.query.memberType) conditions.push('p.memberType=' + req.query.memberType);
     if (req.query.outPatientType) conditions.push('r.outPatientType=' + req.query.outPatientType);
     if (req.query.departmentId) conditions.push('r.departmentId=' + req.query.departmentId);
     if (req.query.doctorId) conditions.push('r.doctorId=' + req.query.doctorId);
+    if (req.query.outpatientStatus) conditions.push('r.outpatientStatus=' + req.query.outpatientStatus);
     if (req.query.registrationType) conditions.push('r.registrationType=' + req.query.registrationType);
     if (req.query.patientName) conditions.push('r.patientName like \'%' + req.query.patientName + '%\'');
     if (req.query.patientMobile) conditions.push('r.patientMobile like \'%' + req.query.patientMobile + '%\'');
     if (req.query.status) conditions.push('r.status=' + req.query.status);
-    if (req.query.recommender) conditions.push('r.recommender=' + req.query.recommender);
+    if (req.query.recommender) conditions.push('r.businessPeopleId=' + req.query.recommender);
     return conditions;
 }
 module.exports = {
@@ -59,6 +60,7 @@ module.exports = {
                 registration.memberType = config.memberType[registration.memberType];
                 registration.outPatientType = config.outPatientType[registration.outPatientType];
                 registration.status = config.registrationStatus[registration.status];
+                registration.outpatientStatus = config.outpatientStatus[registration.outpatientStatus];
             });
             registrations.pageIndex = pageIndex;
             return res.send({ret: 0, data: registrations});
@@ -69,7 +71,7 @@ module.exports = {
         var r = req.body;
         r.createDate = new Date();
         businessPeopleDAO.findShiftPlanByDoctorAndShiftPeriod(r.doctorId, r.registerDate, r.shiftPeriod).then(function (plans) {
-            if (!plans.length || (plans[0].plannedQuantity < +plans[0].actualQuantity + 1)) {
+            if (!plans.length || (plans[0].plannedQuantity <= +plans[0].actualQuantity)) {
                 return res.send({ret: 1, message: i18n.get('doctor.shift.plan.invalid')});
             }
             return businessPeopleDAO.findPatientBasicInfoBy(r.patientMobile).then(function (basicInfos) {

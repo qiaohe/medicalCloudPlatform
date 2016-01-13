@@ -81,10 +81,13 @@ module.exports = {
         return db.query(sqlMapping.registration.findShiftPlansByDayWithName, [+hospitalId, +doctorId, day]);
     },
 
-    findPerformances: function (hospitalId, conditions) {
-        return db.query(sqlMapping.businessPeople.findPerformances + (conditions.length ? ' and ' + conditions : '') + '  order by name, yearMonth', hospitalId);
+    findPerformances: function (hospitalId, conditions, businessPeopleIds) {
+        var idList = businessPeopleIds && businessPeopleIds.join(',');
+        return db.query(sqlMapping.businessPeople.findPerformances + (conditions.length ? ' and ' + conditions : '') + ' and p.businessPeopleId in (' + idList + ') order by name, yearMonth', hospitalId);
     },
-
+    findBusinessPeopleWithPage: function (hospitalId, page, conditions) {
+        return db.queryWithCount(sqlMapping.businessPeople.findBusinessPeopleWithPage + (conditions.length ? ' and ' + conditions : '') + '  order by e.name limit ?, ?', [hospitalId, page.from, page.size]);
+    },
     findPerformancesBy: function (businessPeopleId) {
         return db.query(sqlMapping.businessPeople.findPerformancesBy, businessPeopleId);
 
@@ -125,7 +128,7 @@ module.exports = {
     updateRole: function (role) {
         return db.query(sqlMapping.employee.updateRole, [role, role.id]);
     },
-    deletePerformancesBy: function(businessPeopleId) {
-        return db.query(sqlMapping.businessPeople.deletePerformancesBy, businessPeopleId);
+    deletePerformancesBy: function (businessPeopleId, year) {
+        return db.query(sqlMapping.businessPeople.deletePerformancesBy, [businessPeopleId, year]);
     }
 }

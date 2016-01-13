@@ -133,7 +133,7 @@ module.exports = {
                     return employeeDAO.findJobTitleById(employee.jobTitle)
                 }).then(function (jobTitles) {
                     d.jobTitle = jobTitles[0].name;
-                    return employeeDAO.updateDoctor(doctor);
+                    return employeeDAO.updateDoctorBy(d);
                 });
             }
         }).then(function (result) {

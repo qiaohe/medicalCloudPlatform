@@ -30,6 +30,10 @@ module.exports = {
     findById: function (id, hospitalId) {
         return db.query(sqlMapping.employee.findById, [id, hospitalId]);
     },
+
+    findByIdWithHospital: function(hospitalId, id) {
+        return db.query(sqlMapping.employee.findByIdWithHospital, [+hospitalId, +id]);
+    },
     findDoctorsGroupByDepartment: function (hospitalId) {
         return db.query(sqlMapping.doctor.findDoctorsGroupByDepartment, hospitalId);
     },

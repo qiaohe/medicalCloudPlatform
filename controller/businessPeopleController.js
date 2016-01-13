@@ -8,6 +8,13 @@ var i18n = require('../i18n/localeMessage');
 var businessPeopleDAO = require('../dao/businessPeopleDAO');
 var hospitalDAO = require('../dao/hospitalDAO');
 var md5 = require('md5');
+function getConditions(req) {
+    var conditions = [];
+    if (req.query.groupId) conditions.push('ic.groupId=' + req.query.groupId);
+    if (req.query.name) conditions.push('ic.name like \'%' + req.query.name + '%\'');
+    if (req.query.mobile) conditions.push('ic.mobile like \'%' + req.query.mobile + '%\'');
+    return conditions;
+}
 module.exports = {
     getPerformanceByMonth: function (req, res, next) {
         var yearMonth = req.params.yearMonth;
@@ -43,7 +50,7 @@ module.exports = {
         businessPeopleDAO.findContactsByPagable(req.params.id, {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
-        }).then(function (contacts) {
+        }, getConditions(req)).then(function (contacts) {
             if (!contacts.rows.length) return res.send({ret: 0, data: {rows: []}});
             contacts.rows.forEach(function (contact) {
                 contact.source = config.sourceType[contact.source];
@@ -70,6 +77,7 @@ module.exports = {
     addContact: function (req, res, next) {
         var contact = req.body;
         contact.businessPeopleId = req.user.id;
+        var invitationCode = _.random(1000, 9999);
         businessPeopleDAO.findContactBusinessPeopleIdAndMobile(req.user.id, contact.mobile).then(function (contacts) {
             if (contacts.length) {
                 contact = contacts[0];
@@ -88,9 +96,15 @@ module.exports = {
                 contactId: contact.id,
                 businessPeopleId: req.user.id,
                 status: 0,
-                invitationCode: _.random(1000, 9999)
+                invitationCode: invitationCode
             })
         }).then(function (result) {
+            var smsConfig = config.sms;
+            var option = _.assign(smsConfig.option, {
+                mobile: contact.mobile,
+                content: config.sms.template.replace(':code', invitationCode)
+            });
+            request.postAsync({url: smsConfig.providerUrl, form: option});
             res.send({ret: 0, message: i18n.get('contacts.add.success')});
         });
         return next();
@@ -102,6 +116,7 @@ module.exports = {
             var contact = contacts[0];
             registration = _.assign(registration, {
                 patientName: contact.name, patientMobile: contact.mobile,
+                gender: contact.gender,
                 createDate: new Date()
             });
             return hospitalDAO.findDoctorById(registration.doctorId);

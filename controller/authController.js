@@ -40,7 +40,7 @@ module.exports = {
         return next();
     },
     getMemberInfo: function (req, res, next) {
-        employeeDAO.findById(req.user.id, req.user.hospitalId).then(function (employees) {
+        employeeDAO.findByIdWithHospital(req.user.hospitalId, req.user.id).then(function (employees) {
             res.send({ret: 0, data: employees[0]});
         });
         return next();
