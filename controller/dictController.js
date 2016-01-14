@@ -22,7 +22,8 @@ module.exports = {
 
     getBusinessPeople: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
-        businessPeopleDAO.findBusinessPeople(hospitalId).then(function (result) {
+        var name = req.query.name;
+        businessPeopleDAO.findBusinessPeople(hospitalId, name).then(function (result) {
             res.send({ret: 0, data: result});
         });
         return next();

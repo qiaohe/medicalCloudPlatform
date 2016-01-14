@@ -151,7 +151,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, getConditions(req)).then(function (empoyees) {
-            if (!empoyees.rows.length) res.send({ret: 0, data: {rows: []}});
+            if (!empoyees.rows.length) res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
             empoyees.rows.forEach(function (employee) {
                 employee.status = config.employeeStatus[employee.status];
                 employee.gender = config.gender[employee.gender];
@@ -175,7 +175,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, conditions).then(function (doctors) {
-            if (!doctors.rows.length) res.send({ret: 0, data: {rows: []}});
+            if (!doctors.rows.length) res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
             doctors.rows && doctors.rows.forEach(function (doctor) {
                 doctor.gender = config.gender[doctor.gender];
                 doctor.images = doctor.images && doctor.images.split(',');

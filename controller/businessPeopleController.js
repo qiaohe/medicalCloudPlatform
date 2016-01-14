@@ -51,7 +51,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, getConditions(req)).then(function (contacts) {
-            if (!contacts.rows.length) return res.send({ret: 0, data: {rows: []}});
+            if (!contacts.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
             contacts.rows.forEach(function (contact) {
                 contact.source = config.sourceType[contact.source];
             });

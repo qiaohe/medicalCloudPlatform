@@ -30,7 +30,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, conditions).then(function (companies) {
-            if (!companies.rows.length) return res.send({ret: 0, data: {rows: []}});
+            if (!companies.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
             companies.rows.forEach(function (company) {
                 company.source = config.sourceType[company.source];
                 company.cashbackType = config.cashbackType[company.cashbackType];
@@ -85,7 +85,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, getConditions(req)).then(function (patients) {
-            if (!patients.rows.length) return  res.send({ret: 0, data: {rows: []}});
+            if (!patients.rows.length) return  res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
             patients.rows.forEach(function (p) {
                 p.memberType =  config.memberType[p.memberType];
                 p.source =  config.sourceType[p.source];

@@ -8,6 +8,14 @@ var notificationDAO = require('../dao/notificationDAO');
 var _ = require('lodash');
 var moment = require('moment');
 var Promise = require("bluebird");
+function getConditions(req) {
+    var conditions = [];
+    if (req.query.registrationType) conditions.push('r.registrationType=' + req.query.registrationType);
+    if (req.query.outpatientStatus) conditions.push('r.outPatientStatus=' + req.query.outpatientStatus);
+    if (req.query.patientName) conditions.push('r.patientName like \'%' + req.query.patientName + '%\'');
+    if (req.query.patientMobile) conditions.push('r.patientMobile like \'%' + req.query.patientMobile + '%\'');
+    return conditions;
+}
 module.exports = {
     getDepartments: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
@@ -206,7 +214,7 @@ module.exports = {
         hospitalDAO.findBusinessPeopleWithPage(hospitalId, {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
-        },conditions.length && conditions.join(' and ')).then(function (businessPeoples) {
+        }, conditions.length && conditions.join(' and ')).then(function (businessPeoples) {
             data.count = businessPeoples.count;
             data.pageIndex = pageIndex;
             data.performances = [];
@@ -304,6 +312,7 @@ module.exports = {
         });
         return next();
     },
+
     getOutpatients: function (req, res, next) {
         var doctorId = req.user.id;
         var today = moment().format('YYYY-MM-DD');
@@ -314,36 +323,34 @@ module.exports = {
             authorizedCount: 0,
             availableAuthorizedCount: 0
         };
-        hospitalDAO.findWaitOutpatients(doctorId, today).then(function (items) {
-            items.length && items.forEach(function (item) {
+        var pageIndex = +req.query.pageIndex;
+        var pageSize = +req.query.pageSize;
+        hospitalDAO.findWaitOutpatients(doctorId, today, {
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        }, getConditions(req)).then(function (items) {
+            items.rows.length && items.rows.forEach(function (item) {
                 item.gender = config.gender[item.gender];
                 item.registrationType = config.registrationType[item.registrationType];
                 item.outPatientType = config.outPatientType[item.outPatientType];
                 item.outpatientStatus = config.outpatientStatus[item.outpatientStatus];
+                item.memberType = config.memberType[item.memberType];
             });
             result.waitQueue = items;
-            result.waitQueueCount = items.length;
-            if (items.length) {
-                return registrationDAO.findCurrentQueueByRegId(items[0].id).then(function (rs) {
+            result.waitQueue.pageIndex = pageIndex;
+            result.waitQueueCount = items.rows.length;
+            if (items.rows.length) {
+                return registrationDAO.findCurrentQueueByRegId(items.rows[0].id).then(function (rs) {
                     rs[0].registrationType = config.registrationType[rs[0].registrationType];
                     rs[0].outPatientType = config.outPatientType[rs[0].outPatientType];
                     rs[0].outpatientStatus = config.outpatientStatus[rs[0].outpatientStatus];
                     rs[0].memberType = config.memberType[rs[0].memberType];
                     result.currentQueue = rs[0];
-                    return hospitalDAO.findHistoryOutpatients(doctorId)
+                    return hospitalDAO.findFinishedCountByDate(doctorId, today)
                 })
             } else {
-                return hospitalDAO.findHistoryOutpatients(doctorId)
+                return hospitalDAO.findFinishedCountByDate(doctorId, today)
             }
-        }).then(function (histories) {
-            histories.length && histories.forEach(function (history) {
-                history.gender = config.gender[history.gender];
-                history.registrationType = config.registrationType[history.registrationType];
-                history.outPatientType = config.outPatientType[history.outPatientType];
-                history.outpatientStatus = config.outpatientStatus[history.outpatientStatus];
-            });
-            result.historyQueue = histories;
-            return hospitalDAO.findFinishedCountByDate(doctorId, today)
         }).then(function (finishCount) {
             result.finishedCount = finishCount[0].count;
             return hospitalDAO.findShiftPlansByDayWithName(req.user.hospitalId, doctorId, today);
@@ -353,6 +360,25 @@ module.exports = {
             res.send({ret: 0, data: result});
         });
         return next();
+    },
+
+    getOutPatientHistories: function (req, res, next) {
+        var doctorId = req.user.id;
+        var pageIndex = +req.query.pageIndex;
+        var pageSize = +req.query.pageSize;
+        hospitalDAO.findHistoryOutpatients(doctorId, {
+            from: (pageIndex - 1) * pageSize,
+            size: pageSize
+        }, getConditions(req)).then(function (histories) {
+            histories.rows.length && histories.rows.forEach(function (history) {
+                history.gender = config.gender[history.gender];
+                history.registrationType = config.registrationType[history.registrationType];
+                history.outPatientType = config.outPatientType[history.outPatientType];
+                history.outpatientStatus = config.outpatientStatus[history.outpatientStatus];
+            });
+            histories.pageIndex = pageIndex;
+            return res.send({ret: 0, data: histories});
+        });
     },
 
     changeOutPatientStatus: function (req, res, next) {

@@ -13,6 +13,15 @@ module.exports = [
         path: "/api/login",
         handler: authController.login
     },
+  {
+        method: "get",
+        path: "/api/outPatients/histories",
+        handler: hospitalController.getOutPatientHistories,
+        secured: 'user'
+    },
+
+
+
     {
         method: "post",
         path: "/api/logout",
