@@ -32,7 +32,6 @@ server.on("uncaughtException", function (req, res, route, err) {
 server.listen(config.server.port, config.server.host, function () {
     console.log('%s listening at %s', server.name, server.url);
 });
-
 io.sockets.on('connect', function (socket) {
     return socket.emit('message', {message: 'message', date: new Date()});
 });

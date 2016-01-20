@@ -42,7 +42,6 @@ module.exports = {
             password: '111111'
         }
     },
-
     registrationType: ["线上预约", "线下预约", "现场挂号", "复诊预约", "转诊挂号", "现场加号", "线上加号", "销售代约", "销售加号"],
     registrationStatus: ["预约成功", "预约未支付", "预约失败", "预约变更", "预约取消"],
     transactionType: ['挂号消费', '充值交易'],

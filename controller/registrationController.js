@@ -118,14 +118,16 @@ module.exports = {
                     doctorHeadPic: doctor.headPic,
                     status: 0, creator: req.user.id
                 });
-                return redis.incrAsync('doctor:' + r.doctorId + ':d:' + r.registerDate + ':incr').then(function (seq) {
-                    r.sequence = seq;
-                    r.outPatientType = 0;
-                    r.outpatientStatus = 5;
-                    r.registrationType = 2;
-                    if (!r.businessPeopleId) delete r.businessPeopleId;
-                    delete r.reason;
-                    return businessPeopleDAO.insertRegistration(r)
+                return redis.incrAsync('doctor:' + r.doctorId + ':d:' + r.registerDate + ':period:' + r.shiftPeriod + ':incr').then(function (seq) {
+                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + r.shiftPeriod).then(function (sp) {
+                        r.sequence = sp + seq;
+                        r.outPatientType = 0;
+                        r.outpatientStatus = 5;
+                        r.registrationType = 2;
+                        if (!r.businessPeopleId) delete r.businessPeopleId;
+                        delete r.reason;
+                        return businessPeopleDAO.insertRegistration(r)
+                    });
                 });
             }).then(function (result) {
                 r.id = result.insertId;

@@ -139,11 +139,13 @@ module.exports = {
         }).then(function (patientBasicInfoList) {
             if (patientBasicInfoList.length) {
                 registration.patientBasicInfoId = patientBasicInfoList[0].id;
-                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':incr').then(function (seq) {
-                    registration.sequence = seq;
-                    registration.outPatientType = 0;
-                    registration.outpatientStatus = 5;
-                    return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
+                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function(sp){
+                        registration.sequence = sp + seq;
+                        registration.outPatientType = 0;
+                        registration.outpatientStatus = 5;
+                        return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+                    });
                 });
             }
             businessPeopleDAO.insertPatientBasicInfo({
@@ -151,11 +153,13 @@ module.exports = {
                 createDate: new Date(), password: md5('password'), creator: req.user.id
             }).then(function (result) {
                 registration.patientBasicInfoId = result.insertId;
-                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':incr').then(function (seq) {
-                    registration.sequence = seq;
-                    registration.outPatientType = 0;
-                    registration.outpatientStatus = 5;
-                    return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate +':period:' + registration.shiftPeriod+ ':incr').then(function (seq) {
+                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function(sp) {
+                        registration.sequence = sp + seq;
+                        registration.outPatientType = 0;
+                        registration.outpatientStatus = 5;
+                        return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+                    });
                 });
             });
         }).then(function (result) {

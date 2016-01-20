@@ -2,7 +2,9 @@
 var config = require('../config');
 var _ = require('lodash');
 var hospitalDAO = require('../dao/hospitalDAO');
+var Promise = require('bluebird');
 var businessPeopleDAO = require('../dao/businessPeopleDAO');
+var redis = require('../common/redisClient');
 var i18n = require('../i18n/localeMessage');
 module.exports = {
     getDepartments: function (req, res, next) {
@@ -29,7 +31,7 @@ module.exports = {
         return next();
     },
 
-    getNoPlanBusinessPeople: function(req, res, next) {
+    getNoPlanBusinessPeople: function (req, res, next) {
         var year = req.params.year;
         var hospitalId = req.user.hospitalId;
         businessPeopleDAO.findNoPlanBusinessPeople(hospitalId, year).then(function (result) {
@@ -45,7 +47,7 @@ module.exports = {
         return next();
     },
 
-    getAvailablePeriods: function(req, res, next) {
+    getAvailablePeriods: function (req, res, next) {
         var hospitalId = req.user.hospitalId;
         var doctorId = req.params.doctorId;
         var day = req.query.day;
@@ -60,14 +62,26 @@ module.exports = {
         period.hospitalId = req.user.hospitalId;
         period.enabled = true;
         businessPeopleDAO.addShiftPeriod(period).then(function (result) {
-            res.send({ret: 0, data: {id: result.insertId, name: period.name}});
+            return businessPeopleDAO.findShiftPeriods(period.hospitalId);
+        }).then(function (shiftPeriods) {
+            Promise.map(shiftPeriods, function (period, index) {
+                redis.setAsync('h:' + req.user.hospitalId + ':p:' + period.id, String.fromCharCode(65 + index))
+            }).then(function (result) {
+                res.send({ret: 0, data: {id: result.insertId, name: period.name}});
+            })
         });
         return next();
     },
 
     removeShiftPeriod: function (req, res, next) {
         businessPeopleDAO.deleteShiftPeriod(req.params.id).then(function (result) {
-            res.send({ret: 0, message: i18n.get('shiftPeriod.remove.success')});
+            return businessPeopleDAO.findShiftPeriods(req.user.hospitalId);
+        }).then(function (shiftPeriods) {
+            Promise.map(shiftPeriods, function (period, index) {
+                redis.setAsync('h:' + req.user.hospitalId + ':p:' + period.id, String.fromCharCode(65 + index))
+            }).then(function (result) {
+                res.send({ret: 0, message: i18n.get('shiftPeriod.remove.success')});
+            })
         });
         return next();
     },
