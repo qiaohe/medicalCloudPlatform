@@ -4,7 +4,9 @@ var config = require('./config');
 var router = require('./common/router');
 var auth = require('./common/auth');
 var logger = require('./common/logger');
+var socketio = require('socket.io');
 var server = restify.createServer(config.server);
+var io = socketio.listen(server.server);
 restify.CORS.ALLOW_HEADERS.push('Access-Control-Allow-Origin');
 server.use(restify.CORS());
 server.opts(/.*/, function (req, res, next) {
@@ -30,3 +32,8 @@ server.on("uncaughtException", function (req, res, route, err) {
 server.listen(config.server.port, config.server.host, function () {
     console.log('%s listening at %s', server.name, server.url);
 });
+
+io.sockets.on('connect', function (socket) {
+    return socket.emit('message', {message: 'message', date: new Date()});
+});
+

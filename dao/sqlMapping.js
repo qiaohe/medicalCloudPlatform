@@ -133,5 +133,12 @@ module.exports = {
     },
     notification: {
         findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?'
+    },
+    device: {
+        insert: 'insert device set ?',
+        findByToken: 'select * from device where token = ?',
+        findByUid: 'select * from device where uid = ?',
+        update: 'update device set ? where token =?',
+        findTokenByUid: 'select token from device where uid=?'
     }
 }
