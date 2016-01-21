@@ -7,6 +7,8 @@ var logger = require('./common/logger');
 var socketio = require('socket.io');
 var server = restify.createServer(config.server);
 var io = socketio.listen(server.server);
+var _ = require('lodash');
+var notificationDAO = require('./dao/notificationDAO');
 restify.CORS.ALLOW_HEADERS.push('Access-Control-Allow-Origin');
 server.use(restify.CORS());
 server.opts(/.*/, function (req, res, next) {
@@ -32,7 +34,35 @@ server.on("uncaughtException", function (req, res, route, err) {
 server.listen(config.server.port, config.server.host, function () {
     console.log('%s listening at %s', server.name, server.url);
 });
+
 io.sockets.on('connect', function (socket) {
-    return socket.emit('message', {message: 'message', date: new Date()});
+    socket.join('floor1');
+    var data = [];
+    notificationDAO.findPatientQueue().then(function (queueList) {
+        var data = [];
+        queueList.forEach(function (queue) {
+            if (!queue.clinic) queue.clinic = '1';
+            queue.clinic = config.clinicConfig[queue.clinic];
+            var item = _.find(data, {
+                doctorId: queue.doctorId,
+                doctorName: queue.doctorName,
+                departmentName: queue.departmentName,
+                clinic: queue.clinic
+            });
+            if (item) {
+                if (item.sequences.length < 4)
+                    item.sequences.push(queue.sequence);
+            } else {
+                data.push({
+                    doctorId: queue.doctorId,
+                    doctorName: queue.doctorName,
+                    departmentName: queue.departmentName,
+                    clinic: queue.clinic,
+                    sequences: [queue.sequence]
+                });
+            }
+        });
+    });
+    return io.sockets.in('floor1').emit('message', data);
 });
 

@@ -132,7 +132,8 @@ module.exports = {
         findCities: 'select cityId, city from city where province=?'
     },
     notification: {
-        findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?'
+        findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?',
+        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId order by doctorId, sequence'
     },
     device: {
         insert: 'insert device set ?',
