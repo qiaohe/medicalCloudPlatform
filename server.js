@@ -34,7 +34,6 @@ server.on("uncaughtException", function (req, res, route, err) {
 server.listen(config.server.port, config.server.host, function () {
     console.log('%s listening at %s', server.name, server.url);
 });
-
 io.sockets.on('connect', function (socket) {
     socket.join('floor1');
     var data = [];
@@ -62,7 +61,9 @@ io.sockets.on('connect', function (socket) {
                 });
             }
         });
+        return io.sockets.in('floor1').emit('refresh', data);
     });
+});
+process.on('queueEvent', function (data) {
     return io.sockets.in('floor1').emit('message', data);
 });
-

@@ -4,7 +4,7 @@ module.exports = {
     server: {
         name: 'medical cloud platform',
         version: '0.0.1',
-        host: '121.42.171.213',
+        host: 'localhost',
         port: 8080
     },
     db: {
@@ -42,6 +42,7 @@ module.exports = {
             password: '111111'
         }
     },
+
     clinicConfig: {
         "1": "一诊室",
         "2": "二诊室",

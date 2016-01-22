@@ -362,6 +362,27 @@ module.exports = {
         return next();
     },
 
+    queueOutPatient: function (req, res, next) {
+        var rid = req.params.id;
+        var data = {};
+        notificationDAO.findPatientQueueBy(rid).then(function (result) {
+            if (result && result.length) {
+                data = result[0];
+                data.clinic = config.clinicConfig[data.clinic ? data.clinic : '1'];
+                notificationDAO.findSequencesBy(data.doctorId, data.sequence).then(function (sequences) {
+                    delete data.sequence;
+                    data.sequences = [];
+                    sequences.length && sequences.forEach(function (seq) {
+                        data.sequences.push(seq.sequence);
+                    });
+                    process.emit('queueEvent', data);
+                });
+            }
+        });
+        res.send({ret: 0, data: '叫号成功'});
+        return next();
+    },
+
     getOutPatientHistories: function (req, res, next) {
         var doctorId = req.user.id;
         var pageIndex = +req.query.pageIndex;

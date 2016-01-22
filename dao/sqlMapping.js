@@ -54,7 +54,7 @@ module.exports = {
         insertPerformance: 'insert Performance set ?',
         updatePerformance: 'update Performance set plannedCount = ? where businessPeopleId= ? and yearMonth = ?',
         findPerformances: 'select e.id as businessPeopleId, e.`name`, p.yearMonth, actualCount, plannedCount,ROUND(actualCount / plannedCount, 2) as completePercentage from Performance p, Employee e where e.id = p.businessPeopleId and e.hospitalId=? ',
-        findBusinessPeopleWithPage:'select SQL_CALC_FOUND_ROWS distinct p.businessPeopleId, e.name from Performance p, Employee e where e.id = p.businessPeopleId and e.hospitalId=?',
+        findBusinessPeopleWithPage: 'select SQL_CALC_FOUND_ROWS distinct p.businessPeopleId, e.name from Performance p, Employee e where e.id = p.businessPeopleId and e.hospitalId=?',
         findPerformancesBy: 'select e.id as businessPeopleId, e.`name`, p.yearMonth, actualCount, plannedCount,ROUND(actualCount / plannedCount, 2) as completePercentage from Performance p, Employee e where e.id = p.businessPeopleId and p.businessPeopleId=? order by p.yearMonth'
     },
     hospital: {
@@ -133,7 +133,9 @@ module.exports = {
     },
     notification: {
         findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?',
-        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId order by doctorId, sequence'
+        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId order by doctorId, sequence',
+        findPatientQueueBy: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId where r.id=?',
+        findSequencesBy: 'select r.sequence from Registration r where r.doctorId =1 and sequence>? limit 3'
     },
     device: {
         insert: 'insert device set ?',
@@ -142,4 +144,4 @@ module.exports = {
         update: 'update device set ? where token =?',
         findTokenByUid: 'select token from device where uid=?'
     }
-}
+};

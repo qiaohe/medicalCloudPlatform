@@ -499,6 +499,12 @@ module.exports = [
     },
     {
         method: "get",
+        path: "/api/outPatients/:id/queuing",
+        handler: hospitalController.queueOutPatient,
+        secured: 'user'
+    },
+    {
+        method: "get",
         path: "/api/myRegistrations",
         handler: registrationController.getRegistrationsOfDoctor,
         secured: 'user'
