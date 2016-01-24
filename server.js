@@ -5,6 +5,7 @@ var router = require('./common/router');
 var auth = require('./common/auth');
 var logger = require('./common/logger');
 var socketio = require('socket.io');
+var moment = require('moment');
 var server = restify.createServer(config.server);
 var io = socketio.listen(server.server);
 var _ = require('lodash');
@@ -37,7 +38,7 @@ server.listen(config.server.port, config.server.host, function () {
 io.sockets.on('connect', function (socket) {
     socket.join('floor1');
     var data = [];
-    notificationDAO.findPatientQueue().then(function (queueList) {
+    notificationDAO.findPatientQueue(moment().format('YYYY-MM-DD')).then(function (queueList) {
         var data = [];
         queueList.forEach(function (queue) {
             if (!queue.clinic) queue.clinic = '1';
@@ -45,6 +46,7 @@ io.sockets.on('connect', function (socket) {
             var item = _.find(data, {
                 doctorId: queue.doctorId,
                 doctorName: queue.doctorName,
+                patientName:queue.patientName,
                 departmentName: queue.departmentName,
                 clinic: queue.clinic
             });
@@ -55,6 +57,7 @@ io.sockets.on('connect', function (socket) {
                 data.push({
                     doctorId: queue.doctorId,
                     doctorName: queue.doctorName,
+                    patientName:queue.patientName,
                     departmentName: queue.departmentName,
                     clinic: queue.clinic,
                     sequences: [queue.sequence]

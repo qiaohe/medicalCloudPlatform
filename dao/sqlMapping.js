@@ -133,9 +133,9 @@ module.exports = {
     },
     notification: {
         findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?',
-        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId order by doctorId, sequence',
+        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId where r.registerDate = ? order by doctorId, sequence',
         findPatientQueueBy: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId where r.id=?',
-        findSequencesBy: 'select r.sequence from Registration r where r.doctorId =1 and sequence>? limit 3'
+        findSequencesBy: 'select r.sequence from Registration r where r.doctorId =? and sequence>? limit 3'
     },
     device: {
         insert: 'insert device set ?',
