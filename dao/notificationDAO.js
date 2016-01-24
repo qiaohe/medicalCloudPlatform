@@ -10,5 +10,11 @@ module.exports = {
     },
     findPatientQueue: function () {
         return db.query(sqlMapping.notification.findPatientQueue);
+    },
+    findPatientQueueBy: function (rid) {
+        return db.query(sqlMapping.notification.findPatientQueueBy, rid);
+    },
+    findSequencesBy: function (doctorId, sequence) {
+        return db.query(sqlMapping.notification.findSequencesBy, [doctorId, sequence]);
     }
 }

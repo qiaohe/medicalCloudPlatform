@@ -376,10 +376,10 @@ module.exports = {
                         data.sequences.push(seq.sequence);
                     });
                     process.emit('queueEvent', data);
-                    res.send({ret: 0, data: '叫号成功'});
                 });
             }
         });
+        res.send({ret: 0, data: '叫号成功'});
         return next();
     },
 
