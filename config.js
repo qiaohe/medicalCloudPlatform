@@ -4,7 +4,7 @@ module.exports = {
     server: {
         name: 'medical cloud platform',
         version: '0.0.1',
-        host: 'localhost',
+        host: '121.42.171.213',
         port: 8080
     },
     db: {
@@ -30,8 +30,8 @@ module.exports = {
         prefix: "http://7xoadl.com2.z0.glb.qiniucdn.com/"
     },
     jpush: {
-        masterSecret: "e77461a38257ec2049387a04",
-        appKey: "0fce1f73a7ac164ca3e09dc7"
+        masterSecret: "03001553e21aa6149ade49a3",
+        appKey: "3a13b5337b61a7471eb6d4d4"
     },
     sms: {
         providerUrl: 'http://115.29.44.189:8080/sms/smsInterface.do',
@@ -68,6 +68,13 @@ module.exports = {
     cashbackType: ['赠劵', '优惠券', '免单'],
     paymentType: ['银行卡', '储值卡', '现金', '代付', '微信钱包', '支付宝'],
     consumptionLevel: ['<1000', '1000~3000', '3000~5000', '5000~10000', '>10000'],
-    employeeStatus: ['在职', '试用', '离职']
+    employeeStatus: ['在职', '试用', '离职'],
+    registrationNotificationTemplate: '%s，您已成功预约%s医生，就诊时间%s，请提前到半小时到分诊台，进行取号确认',
+    changeRegistrationTemplate: '%s，您已成功改约%s医生，就诊时间%s，请提前到半小时到分诊台，进行取号确认。',
+    cancelRegistrationTemplate: '%s，您已成功取消预约%s，如有需要请再次预约，谢谢！',
+    outPatientReminderTemplate: '%s，您预约的%s医生，就诊时间%s，现在离就诊时间还剩1小时，请提前到分诊台，进行确认。',
+    outPatientCallTemplate: '%s，请您到%s诊室就诊，接诊医师：%s',
+    notAvailableTemplate: '%s，很抱歉，您预约的%s %s医生，就诊时间已过，请及时与前台联系，谢谢！',
+    returnRegistrationTemplate: '%s，您已预约复诊%s医生，就诊时间%s，请带好病历本及检查结果，提前到分诊台，进行确认。'
 };
 

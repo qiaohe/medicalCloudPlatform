@@ -4,6 +4,8 @@ var i18n = require('../i18n/localeMessage');
 var registrationDAO = require('../dao/registrationDAO');
 var businessPeopleDAO = require('../dao/businessPeopleDAO');
 var hospitalDAO = require('../dao/hospitalDAO');
+var deviceDAO = require('../dao/deviceDAO');
+var pusher = require('../domain/NotificationPusher');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var moment = require('moment');
@@ -133,6 +135,24 @@ module.exports = {
                 r.id = result.insertId;
                 return businessPeopleDAO.updateShiftPlan(r.doctorId, r.registerDate, r.shiftPeriod);
             }).then(function (result) {
+                deviceDAO.findTokenByUid(r.patientBasicInfoId).then(function (tokens) {
+                    if (r.registrationType == 3 && tokens.length && tokens[0]) {
+                        businessPeopleDAO.findShiftPeriodById(r.hospitalId, r.shiftPeriod).then(function (result) {
+                            var notificationBody = util.format(config.returnRegistrationTemplate, r.patientName + (r.gender == 0 ? '先生' : '女士'),
+                                r.hospitalName + r.departmentName + r.doctorName, r.registerDate + ' ' + result[0].name);
+                            pusher.push({
+                                body: notificationBody,
+                                title: '复诊预约提醒',
+                                audience: {registration_id: [tokens[0].token]},
+                                patientName: r.patientName,
+                                patientMobile: r.patientMobile,
+                                uid: r.patientBasicInfoId
+                            }, function (err, result) {
+                                if (err) throw err;
+                            });
+                        });
+                    }
+                });
                 res.send({ret: 0, dta: r})
             });
         });

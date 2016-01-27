@@ -46,7 +46,6 @@ io.sockets.on('connect', function (socket) {
             var item = _.find(data, {
                 doctorId: queue.doctorId,
                 doctorName: queue.doctorName,
-                patientName:queue.patientName,
                 departmentName: queue.departmentName,
                 clinic: queue.clinic
             });
