@@ -36,9 +36,11 @@ server.listen(config.server.port, config.server.host, function () {
     console.log('%s listening at %s', server.name, server.url);
 });
 io.sockets.on('connect', function (socket) {
-    socket.join('floor1');
+    console.log(socket.handshake.query);
+    var roomId = socket.handshake.query.roomId;
+    socket.join(roomId);
     var data = [];
-    notificationDAO.findPatientQueue(moment().format('YYYY-MM-DD')).then(function (queueList) {
+    notificationDAO.findPatientQueue(moment().format('YYYY-MM-DD'), +roomId).then(function (queueList) {
         var data = [];
         queueList.forEach(function (queue) {
             if (!queue.clinic) queue.clinic = '1';
@@ -56,16 +58,16 @@ io.sockets.on('connect', function (socket) {
                 data.push({
                     doctorId: queue.doctorId,
                     doctorName: queue.doctorName,
-                    patientName:queue.patientName,
+                    patientName: queue.patientName,
                     departmentName: queue.departmentName,
                     clinic: queue.clinic,
                     sequences: [queue.sequence]
                 });
             }
         });
-        return io.sockets.in('floor1').emit('refresh', data);
+        return io.sockets.in(roomId).emit('refresh', data);
     });
 });
 process.on('queueEvent', function (data) {
-    return io.sockets.in('floor1').emit('message', data);
+    return io.sockets.in(data.floor).emit('message', data);
 });

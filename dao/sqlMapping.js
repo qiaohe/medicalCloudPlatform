@@ -133,8 +133,8 @@ module.exports = {
     },
     notification: {
         findAll: 'select SQL_CALC_FOUND_ROWS * from notification order by id desc limit ?,?',
-        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId where r.registerDate = ? order by doctorId, sequence',
-        findPatientQueueBy: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId where r.id=?',
+        findPatientQueue: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence from Registration r LEFT JOIN Doctor d on d.id = r.doctorId left JOIN Department dep on dep.id = d.departmentId where r.registerDate = ? and dep.floor = ? order by doctorId, sequence',
+        findPatientQueueBy: 'select doctorId, doctorName, r.departmentName, d.clinic, patientName, sequence, dep.floor from Registration r LEFT JOIN Doctor d on d.id = r.doctorId left JOIN Department dep on dep.id = d.departmentId where r.id=?',
         findSequencesBy: 'select r.sequence from Registration r where r.doctorId =? and sequence>? limit 3'
     },
     device: {

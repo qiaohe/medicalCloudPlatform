@@ -8,8 +8,8 @@ module.exports = {
     findAll: function (page) {
         return db.queryWithCount(sqlMapping.notification.findAll, [page.from, page.size]);
     },
-    findPatientQueue: function (registerDate) {
-        return db.query(sqlMapping.notification.findPatientQueue, registerDate);
+    findPatientQueue: function (registerDate, roomId) {
+        return db.query(sqlMapping.notification.findPatientQueue, [registerDate, roomId]);
     },
     findPatientQueueBy: function (rid) {
         return db.query(sqlMapping.notification.findPatientQueueBy, rid);
