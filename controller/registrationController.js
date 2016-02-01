@@ -4,6 +4,8 @@ var i18n = require('../i18n/localeMessage');
 var registrationDAO = require('../dao/registrationDAO');
 var businessPeopleDAO = require('../dao/businessPeopleDAO');
 var hospitalDAO = require('../dao/hospitalDAO');
+var deviceDAO = require('../dao/deviceDAO');
+var pusher = require('../domain/NotificationPusher');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var moment = require('moment');
@@ -14,7 +16,7 @@ function getConditions(req) {
     if (req.query.memberType) conditions.push('p.memberType=' + req.query.memberType);
     if (req.query.outPatientType) conditions.push('r.outPatientType=' + req.query.outPatientType);
     if (req.query.departmentId) conditions.push('r.departmentId=' + req.query.departmentId);
-    if (req.query.doctorId) conditions.push('r.doctorId=' + req.query.doctorId);
+    if (req.query.employeeId) conditions.push('d.employeeId=' + req.query.employeeId);
     if (req.query.outpatientStatus) conditions.push('r.outpatientStatus=' + req.query.outpatientStatus);
     if (req.query.registrationType) conditions.push('r.registrationType=' + req.query.registrationType);
     if (req.query.patientName) conditions.push('r.patientName like \'%' + req.query.patientName + '%\'');
@@ -133,6 +135,24 @@ module.exports = {
                 r.id = result.insertId;
                 return businessPeopleDAO.updateShiftPlan(r.doctorId, r.registerDate, r.shiftPeriod);
             }).then(function (result) {
+                deviceDAO.findTokenByUid(r.patientBasicInfoId).then(function (tokens) {
+                    if (r.registrationType == 3 && tokens.length && tokens[0]) {
+                        businessPeopleDAO.findShiftPeriodById(r.hospitalId, r.shiftPeriod).then(function (result) {
+                            var notificationBody = util.format(config.returnRegistrationTemplate, r.patientName + (r.gender == 0 ? '先生' : '女士'),
+                                r.hospitalName + r.departmentName + r.doctorName, r.registerDate + ' ' + result[0].name);
+                            pusher.push({
+                                body: notificationBody,
+                                title: '复诊预约提醒',
+                                audience: {registration_id: [tokens[0].token]},
+                                patientName: r.patientName,
+                                patientMobile: r.patientMobile,
+                                uid: r.patientBasicInfoId
+                            }, function (err, result) {
+                                if (err) throw err;
+                            });
+                        });
+                    }
+                });
                 res.send({ret: 0, dta: r})
             });
         });
@@ -226,8 +246,8 @@ module.exports = {
         return next();
     },
     getRegistrationsOfDoctor: function (req, res, next) {
-        var doctorId = req.user.id;
-        req.query.doctorId = doctorId;
+        var employeeId = req.user.id;
+        req.query.employeeId = employeeId;
         var pageIndex = req.query.pageIndex;
         var pageSize = req.query.pageSize;
         registrationDAO.findRegistrations(req.user.hospitalId, getConditions(req), {

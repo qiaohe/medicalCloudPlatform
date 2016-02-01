@@ -4,7 +4,7 @@ module.exports = {
     server: {
         name: 'medical cloud platform',
         version: '0.0.1',
-        host: 'localhost',
+        host: '121.42.171.213',
         port: 8080
     },
     db: {
@@ -24,18 +24,22 @@ module.exports = {
         host: '127.0.0.1',
         port: 6379
     },
+    rongcloud: {
+        appKey: 'm7ua80gbuxrim',
+        appSecret: 'Z4Vyp9riQ9'
+    },
     qiniu: {
         ak: "ZNrhKtanGiBCTOPg4XRD9SMOAbLzy8iREzQzUP5T",
         sk: "L6VfXirR55Gk6mQ67Jn4pg7bksMpc-F5mghT0GK4",
         prefix: "http://7xoadl.com2.z0.glb.qiniucdn.com/"
     },
     jpush: {
-        masterSecret: "e77461a38257ec2049387a04",
-        appKey: "0fce1f73a7ac164ca3e09dc7"
+        masterSecret: "e359739da88500a8e7a93a3b",
+        appKey: "ba7b7b62680de68a0d19fa5a"
     },
     sms: {
         providerUrl: 'http://115.29.44.189:8080/sms/smsInterface.do',
-        template: '【患者通】您的邀请码是:code,赶快去注册使用吧.',
+        template: '【云诊宝】您的邀请码是:code,赶快去注册使用吧.',
         expireTime: 600,
         option: {
             username: 'tuning',

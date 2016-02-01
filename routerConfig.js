@@ -13,15 +13,12 @@ module.exports = [
         path: "/api/login",
         handler: authController.login
     },
-  {
+    {
         method: "get",
         path: "/api/outPatients/histories",
         handler: hospitalController.getOutPatientHistories,
         secured: 'user'
     },
-
-
-
     {
         method: "post",
         path: "/api/logout",
@@ -385,10 +382,18 @@ module.exports = [
     },
     {
         method: "get",
+        path: "/api/patients/basicInfo/:id",
+        handler: patientController.getPatientBy,
+        secured: 'user'
+    },
+    {
+        method: "get",
         path: "/api/patients/:patientId",
         handler: patientController.getPatient,
         secured: 'user'
     },
+
+
     {
         method: "get",
         path: "/api/roles",

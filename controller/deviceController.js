@@ -20,7 +20,6 @@ module.exports = {
         return next();
     },
     pushNotification: function (req, res, next) {
-
         var client = JPush.buildClient(config.jpush.appKey, config.jpush.masterSecret);
         client.push().setPlatform(JPush.ALL)
             .setAudience(JPush.ALL)

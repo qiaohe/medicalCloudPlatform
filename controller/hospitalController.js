@@ -5,6 +5,8 @@ var i18n = require('../i18n/localeMessage');
 var hospitalDAO = require('../dao/hospitalDAO');
 var registrationDAO = require('../dao/registrationDAO');
 var notificationDAO = require('../dao/notificationDAO');
+var deviceDAO = require('../dao/deviceDAO');
+var notificationPusher = require('../domain/NotificationPusher');
 var _ = require('lodash');
 var moment = require('moment');
 var Promise = require("bluebird");
@@ -338,7 +340,12 @@ module.exports = {
             });
             result.waitQueue = items;
             result.waitQueue.pageIndex = pageIndex;
-            result.waitQueueCount = items.rows.length;
+            result.waitQueueCount = _.filter(items.rows, function (item) {
+                return item.outpatientStatus == '待诊中';
+            }).length;
+            result.finishedCount = _.filter(items.rows, function (item) {
+                return item.outpatientStatus == '结束';
+            }).length;
             if (items.rows.length) {
                 return registrationDAO.findCurrentQueueByRegId(items.rows[0].id).then(function (rs) {
                     rs[0].registrationType = config.registrationType[rs[0].registrationType];
@@ -352,7 +359,7 @@ module.exports = {
                 return hospitalDAO.findFinishedCountByDate(doctorId, today)
             }
         }).then(function (finishCount) {
-            result.finishedCount = finishCount[0].count;
+            //result.finishedCount = finishCount[0].count;
             return hospitalDAO.findShiftPlansByDayWithName(req.user.hospitalId, doctorId, today);
         }).then(function (plans) {
             result.availableCount = _.sum(plans, 'restQuantity');
@@ -365,6 +372,7 @@ module.exports = {
     queueOutPatient: function (req, res, next) {
         var rid = req.params.id;
         var data = {};
+        var registration = {};
         notificationDAO.findPatientQueueBy(rid).then(function (result) {
             if (result && result.length) {
                 data = result[0];
@@ -375,7 +383,23 @@ module.exports = {
                     sequences.length && sequences.forEach(function (seq) {
                         data.sequences.push(seq.sequence);
                     });
+
                     process.emit('queueEvent', data);
+                    registrationDAO.findRegistrationsById(rid).then(function (registrations) {
+                        registration = registrations[0];
+                        deviceDAO.findTokenByUid(registration.id).then(function (tokens) {
+                            if (tokens.length && tokens[0]) {
+                                var notificationBody = util.format(config.outPatientCallTemplate, registration.departmentName, registration.doctorName);
+                                notificationPusher.push({
+                                    body: notificationBody,
+                                    title: '叫号提醒通知',
+                                    audience: {registration_id: [tokens[0].token]}
+                                }, function (err, result) {
+                                    if (err) throw err;
+                                });
+                            }
+                        })
+                    });
                     res.send({ret: 0, data: '叫号成功'});
                 });
             }
@@ -404,12 +428,29 @@ module.exports = {
 
     changeOutPatientStatus: function (req, res, next) {
         req.body.finishDate = new Date();
+        var registration = {};
         registrationDAO.updateRegistration(req.body).then(function (result) {
-            res.send({ret: 0, message: i18n.get('outpatientStatus.change.success')});
-        });
-        return next();
+            return registrationDAO.findRegistrationsById(req.body.id);
+        }).then(function (registrations) {
+            registration = registrations[0];
+            return deviceDAO.findTokenByUid(registration.id);
+        }).then(function (tokens) {
+            if (registration.outPatientStatus == 0 && tokens.length && tokens[0]) {
+                var notificationBody = util.format(config.notAvailableTemplate, registration.departmentName, registration.doctorName);
+                notificationPusher.push({
+                    body: notificationBody,
+                    title: '未到提醒通知',
+                    audience: {registration_id: [tokens[0].token]}
+                }, function (err, result) {
+                    if (err) throw err;
+                    res.send({ret: 0, message: i18n.get('outpatientStatus.change.success')});
+                });
+                return next();
+            } else {
+                res.send({ret: 0, message: i18n.get('outpatientStatus.change.success')});
+            }
+        })
     },
-
     getNotifications: function (req, res, next) {
         var pageIndex = +req.query.pageIndex;
         var pageSize = +req.query.pageSize;
