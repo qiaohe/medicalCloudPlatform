@@ -4,7 +4,7 @@ module.exports = {
     server: {
         name: 'medical cloud platform',
         version: '0.0.1',
-        host: '121.42.171.213',
+        host: 'localhost',
         port: 8080
     },
     db: {
@@ -34,6 +34,8 @@ module.exports = {
         prefix: "http://7xoadl.com2.z0.glb.qiniucdn.com/"
     },
     jpush: {
+        masterSecret: "03001553e21aa6149ade49a3",
+        appKey: "3a13b5337b61a7471eb6d4d4"
         masterSecret: "e359739da88500a8e7a93a3b",
         appKey: "ba7b7b62680de68a0d19fa5a"
     },
