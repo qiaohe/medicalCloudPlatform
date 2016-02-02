@@ -340,7 +340,12 @@ module.exports = {
             });
             result.waitQueue = items;
             result.waitQueue.pageIndex = pageIndex;
-            result.waitQueueCount = items.rows.length;
+            result.waitQueueCount = _.filter(items.rows, function (item) {
+                return item.outpatientStatus == '待诊中';
+            }).length;
+            result.finishedCount = _.filter(items.rows, function (item) {
+                return item.outpatientStatus == '结束';
+            }).length;
             if (items.rows.length) {
                 return registrationDAO.findCurrentQueueByRegId(items.rows[0].id).then(function (rs) {
                     rs[0].registrationType = config.registrationType[rs[0].registrationType];
@@ -354,7 +359,7 @@ module.exports = {
                 return hospitalDAO.findFinishedCountByDate(doctorId, today)
             }
         }).then(function (finishCount) {
-            result.finishedCount = finishCount[0].count;
+            //result.finishedCount = finishCount[0].count;
             return hospitalDAO.findShiftPlansByDayWithName(req.user.hospitalId, doctorId, today);
         }).then(function (plans) {
             result.availableCount = _.sum(plans, 'restQuantity');

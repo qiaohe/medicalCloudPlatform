@@ -16,6 +16,7 @@ function getConditions(req) {
     if (req.query.memberType) conditions.push('p.memberType=' + req.query.memberType);
     if (req.query.outPatientType) conditions.push('r.outPatientType=' + req.query.outPatientType);
     if (req.query.departmentId) conditions.push('r.departmentId=' + req.query.departmentId);
+    if (req.query.employeeId) conditions.push('d.employeeId=' + req.query.employeeId);
     if (req.query.doctorId) conditions.push('r.doctorId=' + req.query.doctorId);
     if (req.query.outpatientStatus) conditions.push('r.outpatientStatus=' + req.query.outpatientStatus);
     if (req.query.registrationType) conditions.push('r.registrationType=' + req.query.registrationType);
@@ -246,8 +247,8 @@ module.exports = {
         return next();
     },
     getRegistrationsOfDoctor: function (req, res, next) {
-        var doctorId = req.user.id;
-        req.query.doctorId = doctorId;
+        var employeeId = req.user.id;
+        req.query.employeeId = employeeId;
         var pageIndex = req.query.pageIndex;
         var pageSize = req.query.pageSize;
         registrationDAO.findRegistrations(req.user.hospitalId, getConditions(req), {
