@@ -134,5 +134,8 @@ module.exports = {
     },
     deletePerformancesBy: function (businessPeopleId, year) {
         return db.query(sqlMapping.businessPeople.deletePerformancesBy, [businessPeopleId, year]);
+    },
+    findCustomerServiceId: function(hospitalId) {
+        return db.query(sqlMapping.hospital.findCustomerServiceId, hospitalId);
     }
 }

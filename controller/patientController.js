@@ -30,7 +30,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, conditions).then(function (companies) {
-            if (!companies.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
+            if (!companies.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex: 0, count: 0}});
             companies.rows.forEach(function (company) {
                 company.source = config.sourceType[company.source];
                 company.cashbackType = config.cashbackType[company.cashbackType];
@@ -85,10 +85,10 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, getConditions(req)).then(function (patients) {
-            if (!patients.rows.length) return  res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
+            if (!patients.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex: 0, count: 0}});
             patients.rows.forEach(function (p) {
-                p.memberType =  config.memberType[p.memberType];
-                p.source =  config.sourceType[p.source];
+                p.memberType = config.memberType[p.memberType];
+                p.source = config.sourceType[p.source];
                 p.gender = config.gender[p.gender];
                 p.consumptionLevel = config.consumptionLevel[p.consumptionLevel];
             });
@@ -232,6 +232,14 @@ module.exports = {
                 registration.status = registration.status == null ? null : config.registrationStatus[registration.status];
             });
             res.send({ret: 0, data: data});
+        });
+        return next();
+    },
+    getPatientBy: function (req, res, next) {
+        var patientId = req.params.id;
+        patientDAO.findPatientBasicInfoById(+patientId).then(function (patients) {
+            if (!patients.length) res.send({ret: 0, data: {}});
+            res.send({ret: 0, data: patients[0]});
         });
         return next();
     }

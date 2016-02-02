@@ -64,7 +64,8 @@ module.exports = {
         insertPatient: 'insert Patient set ?',
         findPatientByBasicInfoId: 'select * from Patient where patientBasicInfoId = ?',
         findJobTitles: 'select id, name from JobTitle where hospitalId =?',
-        update: 'update Hospital set ? where id = ?'
+        update: 'update Hospital set ? where id = ?',
+        findCustomerServiceId: 'select customerServiceUid from Hospital where id =? '
     },
 
     department: {
@@ -122,6 +123,7 @@ module.exports = {
         updatePatientBalance: 'update Patient set balance = balance + ? where id =?',
         insertTransactionFlow: 'insert TransactionFlow set ?',
         findByPatientId: 'select * from Patient where id=?',
+        findPatientBasicInfoById: 'select * from PatientBasicInfo where id=?',
         findByPatientBasicInfo: 'select e.id as recommenderId, pb.address, pb.idCard, p.balance, p.cashbackType, p.`comment`, p.maxDiscountRate, p.source, p.id, pb.`name`, pb.gender, pb.headPic,pb.birthday, pb.mobile, p.memberCardNo,p.memberType,p.source,e.`name` as recommenderName,p.consumptionLevel, gc.`name` as groupName, p.groupId  from Patient p left JOIN Employee e on e.id = p.recommender LEFT JOIN GroupCompany gc on gc.id =p.groupId , PatientBasicInfo pb where p.patientBasicInfoId = pb.id and p.id = ? and p.hospitalId =?',
         findTransactionFlows: 'select * from TransactionFlow where patientId=? and hospitalId = ?',
         findRegistrations: 'select * from Registration where patientId = ? and hospitalId = ?',

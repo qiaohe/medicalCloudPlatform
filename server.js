@@ -40,7 +40,7 @@ io.sockets.on('connect', function (socket) {
     var roomId = socket.handshake.query.roomId;
     socket.join(roomId);
     var data = [];
-    notificationDAO.findPatientQueue(moment().format('YYYY-MM-DD'), +roomId).then(function (queueList) {
+    notificationDAO.findPatientQueue(moment().format('YYYY-MM-DD'), roomId).then(function (queueList) {
         var data = [];
         queueList.forEach(function (queue) {
             if (!queue.clinic) queue.clinic = '1';
@@ -48,7 +48,7 @@ io.sockets.on('connect', function (socket) {
             var item = _.find(data, {
                 doctorId: queue.doctorId,
                 doctorName: queue.doctorName,
-                departmentName: queue.departmentName,
+   //             departmentName: queue.departmentName,
                 clinic: queue.clinic
             });
             if (item) {

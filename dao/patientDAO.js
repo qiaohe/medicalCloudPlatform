@@ -33,6 +33,11 @@ module.exports = {
     findByPatientId: function (id) {
         return db.query(sqlMapping.patient.findByPatientId, id);
     },
+
+    findPatientBasicInfoById: function (id) {
+        return db.query(sqlMapping.patient.findPatientBasicInfoById, id);
+    },
+
     findByPatientBasicInfo: function (patientId, hospitalId) {
         return db.query(sqlMapping.patient.findByPatientBasicInfo, [patientId, hospitalId]);
     },
