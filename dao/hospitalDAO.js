@@ -135,7 +135,29 @@ module.exports = {
     deletePerformancesBy: function (businessPeopleId, year) {
         return db.query(sqlMapping.businessPeople.deletePerformancesBy, [businessPeopleId, year]);
     },
-    findCustomerServiceId: function(hospitalId) {
+    findCustomerServiceId: function (hospitalId) {
         return db.query(sqlMapping.hospital.findCustomerServiceId, hospitalId);
+    },
+    findMyMenus: function (uid) {
+        return db.query(sqlMapping.hospital.findMyMenus, uid);
+    },
+
+    findMenus: function () {
+        return db.query(sqlMapping.hospital.findMenus);
+    },
+
+    findMenusByJobTitle: function (jobTitleId) {
+        return db.query(sqlMapping.hospital.findMenusByJobTitle, jobTitleId);
+    },
+
+    deleteMenuByJobTitle: function (jobTitleId, menuItemId) {
+        return db.query(sqlMapping.hospital.deleteMenuByJobTitle, [jobTitleId, menuItemId]);
+    },
+    insertMenuItem: function (item) {
+        return db.query(sqlMapping.hospital.insertMenuItem, item);
+    },
+    findJobTitleMenuItem: function (jobTitleId, menuItemId) {
+        return db.query(sqlMapping.hospital.findJobTitleMenuItem, [jobTitleId, menuItemId]);
     }
+
 }

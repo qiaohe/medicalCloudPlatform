@@ -175,5 +175,51 @@ module.exports = {
             res.send({ret: 0, message: i18n.get('update.role.success')});
         });
         return next();
+    },
+    getMyMenus: function (req, res, next) {
+        hospitalDAO.findMyMenus(req.user.id).then(function (menus) {
+            var result = [];
+            menus.length && menus.forEach(function (menu) {
+                if (!menu.pid) {
+                    result.push({id: menu.id, name: menu.name, routeUri: menu.routeUri, icon: menu.icon, subItems: []});
+                } else {
+                    var item = _.findWhere(result, {id: menu.pid});
+                    item.subItems.push({
+                        id: menu.id,
+                        name: menu.name,
+                        routeUri: menu.routeUri,
+                        icon: menu.icon,
+                        subItems: []
+                    });
+                }
+            });
+            res.send({ret: 0, data: result});
+        });
+        return next();
+    },
+    getMenus: function (req, res, next) {
+        hospitalDAO.findMenus().then(function (menus) {
+            res.send({ret: 0, data: menus});
+        });
+        return next();
+    },
+    getMenusOfJobTitle: function (req, res, next) {
+        var jobTitleId = req.params.id;
+        hospitalDAO.findMenusByJobTitle(jobTitleId).then(function (result) {
+            res.send({ret: 0, data: result});
+        });
+        return next();
+    },
+    postMenusOfJobTitle: function (req, res, next) {
+        var jobTitleId = req.params.id;
+        hospitalDAO.findJobTitleMenuItem(jobTitleId, req.params.menuItemId).then(function (items) {
+            return items.length ? hospitalDAO.deleteMenuByJobTitle(jobTitleId, req.params.menuItemId) : hospitalDAO.insertMenuItem({
+                jobTitleId: jobTitleId,
+                menuItem: req.params.menuItemId
+            });
+        }).then(function (result) {
+            res.send({ret: 0, message: '设置权限成功'});
+        });
+        return next();
     }
 }

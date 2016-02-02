@@ -65,7 +65,13 @@ module.exports = {
         findPatientByBasicInfoId: 'select * from Patient where patientBasicInfoId = ?',
         findJobTitles: 'select id, name from JobTitle where hospitalId =?',
         update: 'update Hospital set ? where id = ?',
-        findCustomerServiceId: 'select customerServiceUid from Hospital where id =? '
+        findCustomerServiceId: 'select customerServiceUid from Hospital where id =? ',
+        deleteMenuByJobTitle: 'delete from JobTitleMenuItem where jobTitleId=? and menuItem=?',
+        insertMenuItem: 'insert JobTitleMenuItem set ?',
+        findJobTitleMenuItem: 'select * from JobTitleMenuItem where jobTitleId=? and menuItem=?',
+        findMenusByJobTitle: 'select m.`name`, m.id from JobTitleMenuItem i left JOIN Menu m on m.id = i.menuItem where i.jobTitleId=?',
+        findMenus: 'select id, name from Menu',
+        findMyMenus: 'select u.name, u.id, u.pid, u.routeUri, u.icon from Employee e left JOIN JobTitleMenuItem m on m.jobTitleId = e.jobTitle left join Menu u on u.id = m.menuItem  where e.id = ? order by u.pid, u.sortIndex'
     },
 
     department: {

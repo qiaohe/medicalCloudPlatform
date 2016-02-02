@@ -519,5 +519,29 @@ module.exports = [
         path: "/api/notifications",
         handler: hospitalController.getNotifications,
         secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/my/menus",
+        handler: dictController.getMyMenus,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/menus",
+        handler: dictController.getMenus,
+        secured: 'user'
+    },
+    {
+        method: "get",
+        path: "/api/jobTitles/:id/menus",
+        handler: dictController.getMenusOfJobTitle,
+        secured: 'user'
+    },
+    {
+        method: "post",
+        path: "/api/jobTitles/:id/menus/:menuItemId",
+        handler: dictController.postMenusOfJobTitle,
+        secured: 'user'
     }
 ];
