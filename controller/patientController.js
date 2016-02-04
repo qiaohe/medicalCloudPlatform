@@ -212,10 +212,10 @@ module.exports = {
             data.basicInfo = (patients.length ? patients[0] : {});
             if (data.basicInfo) {
                 data.basicInfo.cashbackTypeName = data.basicInfo.cashbackType && config.cashbackType[data.basicInfo.cashbackType];
-                data.basicInfo.genderName = data.basicInfo.gender && config.gender[data.basicInfo.gender];
-                data.basicInfo.memberTypeName = data.basicInfo.memberType && config.memberType[data.basicInfo.memberType];
-                data.basicInfo.sourceName = data.basicInfo.source && config.sourceType[data.basicInfo.source];
-                data.basicInfo.consumptionLevelName = data.basicInfo.consumptionLevel && config.consumptionLevel[data.basicInfo.consumptionLevel];
+                data.basicInfo.genderName = config.gender[data.basicInfo.gender];
+                data.basicInfo.memberTypeName = config.memberType[data.basicInfo.memberType];
+                data.basicInfo.sourceName = config.sourceType[data.basicInfo.source];
+                data.basicInfo.consumptionLevelName = config.consumptionLevel[data.basicInfo.consumptionLevel];
             }
             return patientDAO.findTransactionFlows(+patientId, +req.user.hospitalId);
         }).then(function (flows) {

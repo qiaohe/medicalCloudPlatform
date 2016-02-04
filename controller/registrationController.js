@@ -8,6 +8,7 @@ var deviceDAO = require('../dao/deviceDAO');
 var pusher = require('../domain/NotificationPusher');
 var Promise = require('bluebird');
 var _ = require('lodash');
+var util = require('util');
 var moment = require('moment');
 var redis = require('../common/redisClient');
 var md5 = require('md5');
@@ -94,7 +95,7 @@ module.exports = {
                         return businessPeopleDAO.insertPatient({
                             patientBasicInfoId: r.patientBasicInfoId,
                             hospitalId: req.user.hospitalId,
-                            memberType: 1,
+                            memberType: (r.memberType ? r.memberType : 0),
                             balance: 0.00,
                             memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                             createDate: new Date()
@@ -125,7 +126,7 @@ module.exports = {
                         r.sequence = sp + seq;
                         r.outPatientType = 0;
                         r.outpatientStatus = 5;
-                        r.registrationType = 2;
+                        r.registrationType = (r.registrationType ? r.registrationType : 2);
                         if (!r.businessPeopleId) delete r.businessPeopleId;
                         delete r.reason;
                         return businessPeopleDAO.insertRegistration(r)
@@ -171,6 +172,12 @@ module.exports = {
                 })
             }
         }).then(function () {
+            return redis.incrAsync('doctor:' + req.body.doctorId + ':d:' + req.body.registerDate + ':period:' + req.body.shiftPeriod + ':incr').then(function (seq) {
+                return redis.getAsync('h:' + req.user.hospitalId + ':p:' + req.body.shiftPeriod).then(function (sp) {
+                    req.body.sequence = sp + seq;
+                });
+            });
+        }).then(function () {
             if (oldRegistration.doctorId != req.body.doctorId) {
                 return hospitalDAO.findDoctorById(req.body.doctorId).then(function (docotors) {
                     var doctor = docotors[0];
@@ -209,7 +216,9 @@ module.exports = {
             res.send({ret: 0, message: i18n.get('preRegistration.cancel.success')});
         });
         return next();
-    },
+    }
+
+    ,
 
     cancelRegistrationByBackend: function (req, res, next) {
         var registration = {};
@@ -235,16 +244,15 @@ module.exports = {
             res.send({ret: 0, message: i18n.get('preRegistration.cancel.success')});
         });
         return next();
-
     },
-
     getRegistration: function (req, res, next) {
         var rid = req.params.rid;
-        registrationDAO.findRegistrationsById(rid).then(function (result) {
+        registrationDAO.findRegistrationsByIdWithDetail(rid).then(function (result) {
             res.send({ret: 0, data: result[0]});
         });
         return next();
     },
+
     getRegistrationsOfDoctor: function (req, res, next) {
         var employeeId = req.user.id;
         req.query.employeeId = employeeId;
