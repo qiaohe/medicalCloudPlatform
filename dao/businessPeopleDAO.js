@@ -49,7 +49,10 @@ module.exports = {
         return db.query(sqlMapping.businessPeople.findShiftPlanByDoctorAndShiftPeriod, [doctorId, day, shiftPeriod]);
     },
     findPatientBasicInfoBy: function (mobile) {
-        return db.query(sqlMapping.businessPeople.findPatientBasicInfoBy, mobile)
+        return db.query(sqlMapping.businessPeople.findPatientBasicInfoBy, mobile);
+    },
+    findPatientBy: function (hospitalId, basicInfoId) {
+        return db.query(sqlMapping.businessPeople.findPatientBy, [hospitalId, basicInfoId]);
     },
     insertPatientBasicInfo: function (patientBasicInfo) {
         return db.query(sqlMapping.businessPeople.insertPatientBasicInfo, patientBasicInfo)

@@ -78,7 +78,19 @@ module.exports = {
         var contact = req.body;
         contact.businessPeopleId = req.user.id;
         var invitationCode = _.random(1000, 9999);
-        businessPeopleDAO.findContactBusinessPeopleIdAndMobile(req.user.id, contact.mobile).then(function (contacts) {
+        var inviteResult;
+        businessPeopleDAO.findPatientBasicInfoBy(contact.mobile).then(function (patientBasicInfos) {
+            inviteResult = patientBasicInfos.length ? '已注册' : '未注册';
+            if (!patientBasicInfos.length) return businessPeopleDAO.findContactBusinessPeopleIdAndMobile(req.user.id, contact.mobile);
+            return businessPeopleDAO.findPatientBy(req.user.hospitalId, patientBasicInfos[0].id).then(function (patients) {
+                if (patients.length) {
+                    res.send({ret: 1, message: '该联系人已经被绑定。'});
+                    Promise.rejected();
+                } else {
+                    return businessPeopleDAO.findContactBusinessPeopleIdAndMobile(req.user.id, contact.mobile);
+                }
+            })
+        }).then(function (contacts) {
             if (contacts.length) {
                 contact = contacts[0];
                 return businessPeopleDAO.updateContact(contact.id);
@@ -86,7 +98,7 @@ module.exports = {
             return businessPeopleDAO.insertContact(_.assign(contact, {
                 createDate: new Date(),
                 inviteTimes: 1,
-                inviteResult: '未安装'
+                inviteResult: inviteResult
             }))
         }).then(function (result) {
             if (result.insertId)
@@ -111,92 +123,103 @@ module.exports = {
     },
     preRegistrationForContact: function (req, res, next) {
         var registration = req.body;
-        businessPeopleDAO.findContactById(req.body.contactId).then(function (contacts) {
-            delete registration.contactId;
-            var contact = contacts[0];
-            registration = _.assign(registration, {
-                patientName: contact.name, patientMobile: contact.mobile,
-                gender: contact.gender,
-                createDate: new Date()
-            });
-            return hospitalDAO.findDoctorById(registration.doctorId);
-        }).then(function (doctors) {
-            var doctor = doctors[0];
-            registration = _.assign(registration, {
-                departmentId: doctor.departmentId,
-                departmentName: doctor.departmentName,
-                hospitalId: doctor.hospitalId,
-                hospitalName: doctor.hospitalName,
-                registrationFee: doctor.registrationFee,
-                doctorName: doctor.name,
-                doctorJobTitle: doctor.jobTitle,
-                doctorJobTitleId: doctor.jobTitleId,
-                doctorHeadPic: doctor.headPic,
-                paymentType: 1,
-                status: 0, registrationType: 7, memberType: 1, businessPeopleId: req.user.id, creator: req.user.id
-            });
-            return businessPeopleDAO.findPatientBasicInfoBy(registration.patientMobile);
-        }).then(function (patientBasicInfoList) {
-            if (patientBasicInfoList.length) {
-                registration.patientBasicInfoId = patientBasicInfoList[0].id;
-                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
-                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function (sp) {
-                        registration.sequence = sp + seq;
-                        registration.outPatientType = 0;
-                        registration.outpatientStatus = 5;
-                        return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+        businessPeopleDAO.findShiftPlanByDoctorAndShiftPeriod(registration.doctorId, registration.registerDate,
+            registration.shiftPeriod).then(function (plans) {
+                if (!plans.length || (plans[0].plannedQuantity <= +plans[0].actualQuantity)) {
+                    return res.send({ret: 1, message: i18n.get('doctor.shift.plan.invalid')});
+                } else {
+                    businessPeopleDAO.findContactById(req.body.contactId).then(function (contacts) {
+                        delete registration.contactId;
+                        var contact = contacts[0];
+                        registration = _.assign(registration, {
+                            patientName: contact.name, patientMobile: contact.mobile,
+                            gender: contact.gender,
+                            createDate: new Date()
+                        });
+                        return hospitalDAO.findDoctorById(registration.doctorId);
+                    }).then(function (doctors) {
+                        var doctor = doctors[0];
+                        registration = _.assign(registration, {
+                            departmentId: doctor.departmentId,
+                            departmentName: doctor.departmentName,
+                            hospitalId: doctor.hospitalId,
+                            hospitalName: doctor.hospitalName,
+                            registrationFee: doctor.registrationFee,
+                            doctorName: doctor.name,
+                            doctorJobTitle: doctor.jobTitle,
+                            doctorJobTitleId: doctor.jobTitleId,
+                            doctorHeadPic: doctor.headPic,
+                            paymentType: 1,
+                            status: 0,
+                            registrationType: 7,
+                            memberType: 1,
+                            businessPeopleId: req.user.id,
+                            creator: req.user.id
+                        });
+                        return businessPeopleDAO.findPatientBasicInfoBy(registration.patientMobile);
+                    }).then(function (patientBasicInfoList) {
+                        if (patientBasicInfoList.length) {
+                            registration.patientBasicInfoId = patientBasicInfoList[0].id;
+                            return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
+                                return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function (sp) {
+                                    registration.sequence = sp + seq;
+                                    registration.outPatientType = 0;
+                                    registration.outpatientStatus = 5;
+                                    return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+                                });
+                            });
+                        }
+                        businessPeopleDAO.insertPatientBasicInfo({
+                            name: registration.patientName, mobile: registration.patientMobile,
+                            createDate: new Date(), password: md5('password'), creator: req.user.id
+                        }).then(function (result) {
+                            registration.patientBasicInfoId = result.insertId;
+                            return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
+                                return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function (sp) {
+                                    registration.sequence = sp + seq;
+                                    registration.outPatientType = 0;
+                                    registration.outpatientStatus = 5;
+                                    return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
+                                });
+                            });
+                        });
+                    }).then(function (result) {
+                        if (!result.length) {
+                            return redis.incrAsync('member.no.incr').then(function (memberNo) {
+                                return businessPeopleDAO.insertPatient({
+                                    patientBasicInfoId: registration.patientBasicInfoId,
+                                    hospitalId: req.user.hospitalId,
+                                    memberType: 1,
+                                    balance: 0.00,
+                                    memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
+                                    createDate: new Date()
+                                }).then(function (patient) {
+                                    registration.patientId = patient.insertId;
+                                });
+                            });
+                        } else {
+                            registration.patientId = result[0].id;
+                        }
+                        return businessPeopleDAO.insertRegistration(registration);
+                    }).then(function () {
+                        return businessPeopleDAO.updateShiftPlan(registration.doctorId, registration.registerDate, registration.shiftPeriod);
+                    }).then(function () {
+                        return businessPeopleDAO.findShiftPeriodById(req.user.hospitalId, registration.shiftPeriod);
+                    }).then(function (result) {
+                        return res.send({
+                            ret: 0,
+                            data: {
+                                id: registration.id,
+                                registerDate: registration.registerDate,
+                                hospitalName: registration.hospitalName,
+                                departmentName: registration.departmentName,
+                                doctorName: registration.doctorName, jobTtile: registration.doctorJobTtile,
+                                shiftPeriod: result[0].name
+                            }
+                        });
                     });
-                });
-            }
-            businessPeopleDAO.insertPatientBasicInfo({
-                name: registration.patientName, mobile: registration.patientMobile,
-                createDate: new Date(), password: md5('password'), creator: req.user.id
-            }).then(function (result) {
-                registration.patientBasicInfoId = result.insertId;
-                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
-                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function (sp) {
-                        registration.sequence = sp + seq;
-                        registration.outPatientType = 0;
-                        registration.outpatientStatus = 5;
-                        return businessPeopleDAO.findPatientByBasicInfoId(registration.patientBasicInfoId);
-                    });
-                });
-            });
-        }).then(function (result) {
-            if (!result.length) {
-                return redis.incrAsync('member.no.incr').then(function (memberNo) {
-                    return businessPeopleDAO.insertPatient({
-                        patientBasicInfoId: registration.patientBasicInfoId,
-                        hospitalId: req.user.hospitalId,
-                        memberType: 1,
-                        balance: 0.00,
-                        memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
-                        createDate: new Date()
-                    }).then(function (patient) {
-                        registration.patientId = patient.insertId;
-                    });
-                });
-            } else {
-                registration.patientId = result[0].id;
-            }
-            return businessPeopleDAO.insertRegistration(registration);
-        }).then(function () {
-            return businessPeopleDAO.updateShiftPlan(registration.doctorId, registration.registerDate, registration.shiftPeriod);
-        }).then(function () {
-            return businessPeopleDAO.findShiftPeriodById(req.user.hospitalId, registration.shiftPeriod);
-        }).then(function (result) {
-            return res.send({
-                ret: 0,
-                data: {
-                    id: registration.id,
-                    registerDate: registration.registerDate,
-                    hospitalName: registration.hospitalName,
-                    departmentName: registration.departmentName,
-                    doctorName: registration.doctorName, jobTtile: registration.doctorJobTtile,
-                    shiftPeriod: result[0].name
                 }
             });
-        });
         return next();
     },
     getPreRegistrationForContact: function (req, res, next) {
