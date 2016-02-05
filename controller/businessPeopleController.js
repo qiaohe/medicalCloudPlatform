@@ -51,7 +51,7 @@ module.exports = {
             from: (pageIndex - 1) * pageSize,
             size: pageSize
         }, getConditions(req)).then(function (contacts) {
-            if (!contacts.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex:0, count:0}});
+            if (!contacts.rows.length) return res.send({ret: 0, data: {rows: [], pageIndex: 0, count: 0}});
             contacts.rows.forEach(function (contact) {
                 contact.source = config.sourceType[contact.source];
             });
@@ -140,7 +140,7 @@ module.exports = {
             if (patientBasicInfoList.length) {
                 registration.patientBasicInfoId = patientBasicInfoList[0].id;
                 return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
-                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function(sp){
+                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function (sp) {
                         registration.sequence = sp + seq;
                         registration.outPatientType = 0;
                         registration.outpatientStatus = 5;
@@ -153,8 +153,8 @@ module.exports = {
                 createDate: new Date(), password: md5('password'), creator: req.user.id
             }).then(function (result) {
                 registration.patientBasicInfoId = result.insertId;
-                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate +':period:' + registration.shiftPeriod+ ':incr').then(function (seq) {
-                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function(sp) {
+                return redis.incrAsync('doctor:' + registration.doctorId + ':d:' + registration.registerDate + ':period:' + registration.shiftPeriod + ':incr').then(function (seq) {
+                    return redis.getAsync('h:' + req.user.hospitalId + ':p:' + registration.shiftPeriod).then(function (sp) {
                         registration.sequence = sp + seq;
                         registration.outPatientType = 0;
                         registration.outpatientStatus = 5;
@@ -170,7 +170,7 @@ module.exports = {
                         hospitalId: req.user.hospitalId,
                         memberType: 1,
                         balance: 0.00,
-                        memberCardNo: req.user.hospitalId.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
+                        memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                         createDate: new Date()
                     }).then(function (patient) {
                         registration.patientId = patient.insertId;

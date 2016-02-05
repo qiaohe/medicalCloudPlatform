@@ -8,6 +8,7 @@ var notificationDAO = require('../dao/notificationDAO');
 var deviceDAO = require('../dao/deviceDAO');
 var notificationPusher = require('../domain/NotificationPusher');
 var _ = require('lodash');
+var util = require('util');
 var moment = require('moment');
 var Promise = require("bluebird");
 function getConditions(req) {
@@ -383,15 +384,16 @@ module.exports = {
                     sequences.length && sequences.forEach(function (seq) {
                         data.sequences.push(seq.sequence);
                     });
-
-                    process.emit('queueEvent', data);
                     registrationDAO.findRegistrationsById(rid).then(function (registrations) {
                         registration = registrations[0];
-                        deviceDAO.findTokenByUid(registration.id).then(function (tokens) {
+                        deviceDAO.findTokenByUid(registration.patientBasicInfoId).then(function (tokens) {
                             if (tokens.length && tokens[0]) {
-                                var notificationBody = util.format(config.outPatientCallTemplate, registration.departmentName, registration.doctorName);
+                                var notificationBody = util.format(config.outPatientCallTemplate, registration.patientName + (registration.gender == 0 ? '先生' : '女士'), registration.departmentName, registration.doctorName);
                                 notificationPusher.push({
                                     body: notificationBody,
+                                    uid: registration.patientBasicInfoId,
+                                    patientName: registration.patientName,
+                                    patientMobile: registration.patientMobile,
                                     title: '叫号提醒通知',
                                     audience: {registration_id: [tokens[0].token]}
                                 }, function (err, result) {
@@ -400,6 +402,7 @@ module.exports = {
                             }
                         })
                     });
+                    process.emit('queueEvent', data);
                     res.send({ret: 0, data: '叫号成功'});
                 });
             }
@@ -433,12 +436,15 @@ module.exports = {
             return registrationDAO.findRegistrationsById(req.body.id);
         }).then(function (registrations) {
             registration = registrations[0];
-            return deviceDAO.findTokenByUid(registration.id);
+            return deviceDAO.findTokenByUid(registration.patientBasicInfoId);
         }).then(function (tokens) {
-            if (registration.outPatientStatus == 0 && tokens.length && tokens[0]) {
+            if (registration.outpatientStatus == 0 && tokens.length && tokens[0]) {
                 var notificationBody = util.format(config.notAvailableTemplate, registration.departmentName, registration.doctorName);
                 notificationPusher.push({
                     body: notificationBody,
+                    uid: registration.patientBasicInfoId,
+                    patientName: registration.patientName,
+                    patientMobile: registration.patientMobile,
                     title: '未到提醒通知',
                     audience: {registration_id: [tokens[0].token]}
                 }, function (err, result) {
