@@ -191,7 +191,7 @@ module.exports = {
                                     hospitalId: req.user.hospitalId,
                                     memberType: 1,
                                     balance: 0.00,
-                                    memberCardNo: req.user.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
+                                    memberCardNo: registration.hospitalId + '-1-' + _.padLeft(memberNo, 7, '0'),
                                     createDate: new Date()
                                 }).then(function (patient) {
                                     registration.patientId = patient.insertId;
